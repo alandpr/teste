@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v9.4 - Premium File</title>
+    <title>Coffee Master v9.5 - Calibrated</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -25,11 +25,11 @@
         .hidden { display: none !important; }
         .star { font-size: 35px; cursor: pointer; color: #333; padding: 5px; }
         .star.active { color: #f59e0b; }
-        .search-input { background: #000; border: 1px solid #333; font-size: 11px; padding: 10px; border-radius: 10px; text-transform: uppercase; margin-bottom: 10px; }
+        .search-input { background: #000; border: 1px solid #333; font-size: 11px; padding: 12px; border-radius: 10px; text-transform: uppercase; margin-bottom: 15px; }
         input[type=range] { -webkit-appearance: none; background: #333; height: 6px; border-radius: 5px; margin: 10px 0; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #f59e0b; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .grain-thumb { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; background: #222; border: 1px solid #333; }
+        .grain-thumb { width: 65px; height: 65px; border-radius: 14px; object-fit: cover; background: #222; border: 1px solid #333; flex-shrink: 0; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -66,7 +66,7 @@
         <div class="flex justify-between items-center mb-5 sticky top-0 bg-black z-50 py-2">
             <div><h1 class="text-2xl font-black text-amber-500 italic uppercase leading-none">COFFEE MASTER</h1><span id="user-display" class="text-[8px] font-black text-zinc-600 uppercase italic"></span></div>
             <div class="flex gap-2">
-                <button onclick="openPix()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-amber-600 text-amber-500 italic">PAGAR UM CAFÉ ☕</button>
+                <button onclick="openPix()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-amber-600 text-amber-500 italic uppercase">Pagar um café ☕</button>
                 <button onclick="handleLogout()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-zinc-700 text-zinc-500">Sair</button>
             </div>
         </div>
@@ -94,13 +94,13 @@
                     <div class="flex-1"><span class="label-gold">DATA DA TORRA</span><input type="date" id="g-data"></div>
                 </div>
                 <span class="label-gold">Notas Sensoriais</span><textarea id="g-notas" rows="2"></textarea>
-                <span class="label-gold">Foto da Embalagem (Opcional)</span>
+                <span class="label-gold">Foto da Embalagem</span>
                 <input type="file" id="g-photo-input" accept="image/*" class="text-[10px] bg-transparent border-dashed border-zinc-700 p-2">
                 <div id="g-edit-actions" class="hidden flex gap-2 mt-4"><button class="btn-gold flex-1 mt-0" onclick="saveG()">Atualizar</button><button class="bg-zinc-800 text-zinc-400 font-black py-4 px-4 rounded-xl flex-[0.3]" onclick="cancelEdit('g')">X</button></div>
                 <button class="btn-gold w-full" onclick="saveG()" id="g-btn-main">Salvar no Estoque</button>
             </div>
             <span class="label-gold">Filtrar Lista de Grãos</span>
-            <input type="text" id="search-g" class="search-input w-full" oninput="filterList('g')">
+            <input type="text" id="search-g" class="search-input w-full">
             <div id="list-g" class="space-y-3"></div>
         </div>
 
@@ -118,7 +118,7 @@
                         <div><span class="label-gold mt-0">Total</span><input type="number" id="r-total-base" readonly class="text-amber-500 font-bold bg-transparent border-none"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div><span class="label-gold mt-0">Clicks</span><input type="number" id="r-clicks-base"></div>
+                        <div><span class="label-gold mt-0">Clicks Moedor</span><input type="number" id="r-clicks-base"></div>
                         <div><span class="label-gold mt-0">Temperatura</span><input type="number" id="r-temp-base"></div>
                     </div>
                 </div>
@@ -132,7 +132,7 @@
                 <button class="btn-gold w-full mt-5" onclick="saveR()" id="r-btn-main">Salvar Receita</button>
             </div>
             <span class="label-gold">Filtrar Minhas Receitas</span>
-            <input type="text" id="search-r" class="search-input w-full" oninput="filterList('r')">
+            <input type="text" id="search-r" class="search-input w-full">
             <div id="list-r" class="space-y-3"></div>
         </div>
 
@@ -153,7 +153,7 @@
                 <div id="p-steps" class="flex gap-3 mt-6 overflow-x-auto pb-4 scroll-smooth no-scrollbar"></div>
                 <div id="timer" class="text-6xl font-black my-6 text-center italic tracking-tighter">00:00</div>
                 <button id="btn-timer-main" onclick="toggleTimer()" class="bg-green-700 text-white font-black py-4 rounded-xl w-full uppercase">Iniciar</button>
-                <button onclick="abrirFeedback()" class="bg-amber-600 text-black font-black py-4 rounded-xl w-full mt-3 text-sm uppercase italic">Finalizar Preparo</button>
+                <button onclick="abrirFeedback()" class="bg-amber-600 text-black font-black py-4 rounded-xl w-full mt-3 text-sm uppercase italic uppercase">Finalizar Preparo</button>
             </div>
         </div>
         <div id="tab-diario" class="hidden"><div id="list-logs" class="space-y-3"></div></div>
@@ -170,7 +170,7 @@
                 <span class="star" onclick="setRating(1)">★</span><span class="star" onclick="setRating(2)">★</span><span class="star" onclick="setRating(3)">★</span><span class="star" onclick="setRating(4)">★</span><span class="star" onclick="setRating(5)">★</span>
             </div>
             <span class="label-gold mt-0 text-left">Observações</span><textarea id="f-obs" rows="3"></textarea>
-            <div class="mt-4 space-y-3">
+            <div class="mt-4 space-y-3 text-left">
                 <div><div class="flex justify-between text-[10px] font-black text-zinc-500"><span>DOÇURA</span><span id="v-doce">0</span></div><input type="range" id="f-doce" min="0" max="5" value="0" oninput="document.getElementById('v-doce').innerText=this.value" class="w-full"></div>
                 <div><div class="flex justify-between text-[10px] font-black text-zinc-500"><span>ACIDEZ</span><span id="v-acidez">0</span></div><input type="range" id="f-acidez" min="0" max="5" value="0" oninput="document.getElementById('v-acidez').innerText=this.value" class="w-full"></div>
                 <div><div class="flex justify-between text-[10px] font-black text-zinc-500"><span>AMARGOR</span><span id="v-amargor">0</span></div><input type="range" id="f-amargor" min="0" max="5" value="0" oninput="document.getElementById('v-amargor').innerText=this.value" class="w-full"></div>
@@ -193,7 +193,7 @@
         const config = { apiKey: "AIzaSyCbIsrGjuu6KN-A0xpZUC6ID9aOHBEIJSE", authDomain: "coffee-master-e1f5c.firebaseapp.com", projectId: "coffee-master-e1f5c", storageBucket: "coffee-master-e1f5c.firebasestorage.app", messagingSenderId: "171441357303", appId: "1:171441357303:web:c85dc841ee73f6f29e2ef2" };
         firebase.initializeApp(config); const db = firebase.firestore(); const auth = firebase.auth();
         let currentUser = null, userProfile = null, timer = null, seg = 0, editIds = { g: null, r: null }, localData = { g: [], r: [], logs: [] }, activeStepsData = { steps: [], times: [] }, notaSelecionada = 0;
-        const DEFAULT_IMG = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&h=100&fit=crop&q=80";
+        const DEFAULT_IMG = "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=150&h=150&fit=crop&q=80";
 
         auth.onAuthStateChanged(async (user) => {
             if (user) {
@@ -208,6 +208,20 @@
                 document.getElementById('auth-screen').classList.remove('hidden');
                 document.getElementById('main-app').classList.add('hidden');
             }
+        });
+
+        // BUSCA (FIXED)
+        document.getElementById('search-g').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = localData.g.filter(i => 
+                i.nome.toLowerCase().includes(q) || i.prod.toLowerCase().includes(q) || (i.variedade && i.variedade.toLowerCase().includes(q))
+            );
+            renderG(filtered);
+        });
+        document.getElementById('search-r').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = localData.r.filter(i => i.nome.toLowerCase().includes(q) || i.metodo.toLowerCase().includes(q));
+            renderR(filtered);
         });
 
         ['r-ratio-base', 'r-po-base'].forEach(id => {
@@ -225,8 +239,6 @@
                 document.getElementById('btn-timer-main').innerText = "INICIAR";
                 document.getElementById('p-po-val').value = '--';
                 document.getElementById('p-ratio-val').value = '--';
-                document.getElementById('p-clicks-val').value = '--';
-                document.getElementById('p-temp-val').value = '--';
                 document.getElementById('p-total').innerText = '0';
                 document.getElementById('p-steps').innerHTML = '';
             }
@@ -258,14 +270,17 @@
         async function loadG() { 
             let snap = await db.collection('cafes').get();
             localData.g = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderG(localData.g);
+        }
+
+        function renderG(data) {
             let h = '';
-            localData.g.forEach(i => {
-                const isMine = i.owner_uid === currentUser.uid || !i.owner_uid || userProfile.role === 'admin';
+            data.forEach(i => {
+                const isMine = i.owner_uid === currentUser.uid || !i.owner_uid || (userProfile && userProfile.role === 'admin');
                 if(i.visibilidade === 'publico' || isMine) {
-                    h += `
-                    <div class="card p-3 flex gap-3 items-center border border-zinc-800 h-[100px]">
+                    h += `<div class="card p-3 flex gap-3 items-center border border-zinc-800 h-[105px]">
                         <div class="flex-1 min-w-0" onclick="abrirDetalhes('${i.id}')">
-                            <div class="text-[8px] text-zinc-600 font-black uppercase truncate">${i.prod || '--'} • por @${i.owner_nick || 'Admin'}</div>
+                            <div class="text-[8px] text-zinc-600 font-black uppercase truncate">${i.prod || '--'} • @${i.owner_nick || 'Mestre'}</div>
                             <div class="text-base font-black italic uppercase text-white mt-1 leading-tight line-clamp-2">${i.nome}</div>
                             <div class="text-[8px] text-amber-600 font-bold uppercase mt-1 truncate">${i.variedade || '--'} | ${i.processo || '--'} | ${i.altitude || '--'}</div>
                         </div>
@@ -281,49 +296,28 @@
 
         async function saveG() { 
             const photoFile = document.getElementById('g-photo-input').files[0];
-            let photoBase64 = null;
-            if(photoFile) photoBase64 = await processImage(photoFile);
-
+            let photoBase64 = null; if(photoFile) photoBase64 = await processImage(photoFile);
             const d = { prod: document.getElementById('g-prod').value.toUpperCase(), nome: document.getElementById('g-nome').value.toUpperCase(), variedade: document.getElementById('g-variedade').value.toUpperCase(), processo: document.getElementById('g-processo').value.toUpperCase(), altitude: document.getElementById('g-altitude').value.toUpperCase(), torrefacao: document.getElementById('g-torrefacao').value.toUpperCase(), torra: document.getElementById('g-torra').value, data: document.getElementById('g-data').value, notas: document.getElementById('g-notas').value.toUpperCase(), ts: firebase.firestore.FieldValue.serverTimestamp(), owner_uid: currentUser.uid, owner_nick: userProfile.nick, visibilidade: userProfile.type === 'pessoal' ? 'privado' : 'publico' };
             if(photoBase64) d.photo = photoBase64;
-
             if (editIds.g) await db.collection('cafes').doc(editIds.g).update(d); else await db.collection('cafes').add(d);
             cancelEdit('g'); loadG(); 
-        }
-
-        function editG(id, i) { 
-            editIds.g = id; document.getElementById('g-prod').value = i.prod || ""; document.getElementById('g-nome').value = i.nome || "";
-            document.getElementById('g-variedade').value = i.variedade || ""; document.getElementById('g-processo').value = i.processo || "";
-            document.getElementById('g-altitude').value = i.altitude || ""; document.getElementById('g-torrefacao').value = i.torrefacao || ""; 
-            document.getElementById('g-torra').value = i.torra || ""; document.getElementById('g-data').value = i.data || ""; document.getElementById('g-notas').value = i.notas || "";
-            document.getElementById('g-edit-actions').classList.remove('hidden'); document.getElementById('g-btn-main').classList.add('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function loadR() {
             let snap = await db.collection('receitas').get();
             localData.r = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderR(localData.r);
+        }
+
+        function renderR(data) {
             let h = '';
-            localData.r.forEach(i => {
-                const isMine = i.owner_uid === currentUser.uid || !i.owner_uid || userProfile.role === 'admin';
+            data.forEach(i => {
+                const isMine = i.owner_uid === currentUser.uid || !i.owner_uid || (userProfile && userProfile.role === 'admin');
                 if(i.visibilidade === 'publico' || isMine) {
-                    h += `<div class="card p-3 flex justify-between items-center"><div class="flex-1"><div class="text-lg font-black italic uppercase text-amber-500">${i.nome}</div><div class="text-[8px] text-zinc-600 font-black uppercase">por @${i.owner_nick || 'Admin'} | ${i.metodo}</div></div><div class="flex gap-2"> ${isMine ? `<button onclick='editR("${i.id}", ${JSON.stringify(i).replace(/'/g, "&apos;")})' class="p-2 bg-zinc-900 rounded-lg">✏️</button><button onclick='del("receitas","${i.id}","${i.nome}")' class="p-2 bg-zinc-900 rounded-lg">🗑️</button>` : ''} <button onclick="showTab('preparo'); handleRecipeSelect('${i.id}')" class="text-xs font-black p-2 bg-amber-600 text-black rounded-lg italic uppercase">Preparar</button> </div></div>`;
+                    h += `<div class="card p-3 flex justify-between items-center h-[80px]"><div class="flex-1"><div class="text-lg font-black italic uppercase text-amber-500 truncate">${i.nome}</div><div class="text-[8px] text-zinc-600 font-black uppercase mt-1">por @${i.owner_nick || 'Admin'} | ${i.metodo}</div></div><div class="flex gap-2"> ${isMine ? `<button onclick='editR("${i.id}", ${JSON.stringify(i).replace(/'/g, "&apos;")})' class="p-2 bg-zinc-900 rounded-lg">✏️</button><button onclick='del("receitas","${i.id}","${i.nome}")' class="p-2 bg-zinc-900 rounded-lg">🗑️</button>` : ''} <button onclick="showTab('preparo'); handleRecipeSelect('${i.id}')" class="text-xs font-black p-2 bg-amber-600 text-black rounded-lg italic uppercase">Preparar</button> </div></div>`;
                 }
             });
             document.getElementById('list-r').innerHTML = h;
-        }
-
-        function editR(id, i) { 
-            editIds.r = id; document.getElementById('r-nome').value = i.nome; 
-            document.getElementById('r-metodo').value = ['V60','AEROPRESS','KOAR'].includes(i.metodo) ? i.metodo : 'OUTROS';
-            if(document.getElementById('r-metodo').value === 'OUTROS') { document.getElementById('r-metodo-outro').value = i.metodo; document.getElementById('r-metodo-outro-div').classList.remove('hidden'); }
-            document.getElementById('r-ratio-base').value = i.origRatio; document.getElementById('r-po-base').value = i.origPo; 
-            document.getElementById('r-total-base').value = i.origTotal; document.getElementById('r-clicks-base').value = i.origClicks || "";
-            document.getElementById('r-temp-base').value = i.origTemp || ""; document.getElementById('r-bloom-ml').value = i.bloomMl; 
-            document.getElementById('r-bloom-sec').value = i.bloomSec; document.getElementById('ataques-container').innerHTML = ''; 
-            i.ataques?.forEach(a => addAtackField(a.ml, a.sec, a.obs || ""));
-            document.getElementById('r-edit-actions').classList.remove('hidden'); document.getElementById('r-btn-main').classList.add('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function saveR() {
@@ -350,7 +344,7 @@
 
         function handleRecipeSelect(fid) { 
             const s = document.getElementById('p-r'); if(fid) s.value = fid;
-            const o = s.options[s.selectedIndex]; if(s.value=="0")return;
+            const o = s.options[s.selectedIndex]; if(!o || s.value=="0") return;
             document.getElementById('p-ratio-val').value = o.dataset.ratio; document.getElementById('p-po-val').value = o.dataset.po; 
             document.getElementById('p-clicks-val').value = o.dataset.clicks || "--"; document.getElementById('p-temp-val').value = o.dataset.temp || "--";
             upCalc(); 
@@ -362,8 +356,17 @@
             const sR = document.getElementById('p-r'); const sel = sR.options[sR.selectedIndex]; if(!sel || sR.value == "0") return;
             const oT = parseFloat(sel.dataset.total), bM = parseFloat(sel.dataset.bloom), bS = parseFloat(sel.dataset.sec), atksOrig = JSON.parse(sel.dataset.atks || '[]');
             activeStepsData = { steps: [], times: [] };
-            const bN = Math.round(total * (bM / oT)); if(bN > 0) { activeStepsData.steps.push({ type: 'BLOOM', ml: bN, sec: bS, cum: bN, obs: "" }); activeStepsData.times.push(bS); }
-            let c = bN; atksOrig.forEach((a, idx) => { const aN = Math.round(total * (a.ml / oT)); if(aN > 0){ c += aN; activeStepsData.steps.push({ type: `ATK ${idx+1}`, ml: aN, sec: a.sec, cum: c, obs: a.obs || "" }); activeStepsData.times.push((activeStepsData.times.length > 0 ? activeStepsData.times[activeStepsData.times.length-1] : 0) + a.sec); } });
+            const bN = Math.round(total * (bM / oT)); 
+            if(bN > 0) { activeStepsData.steps.push({ type: 'BLOOM', ml: bN, sec: bS, cum: bN, obs: "" }); activeStepsData.times.push(bS); }
+            let c = bN; 
+            atksOrig.forEach((a, idx) => { 
+                const aN = Math.round(total * (a.ml / oT)); 
+                if(aN > 0){ 
+                    c += aN; 
+                    activeStepsData.steps.push({ type: `ATK ${idx+1}`, ml: aN, sec: a.sec, cum: c, obs: a.obs || "" }); 
+                    activeStepsData.times.push((activeStepsData.times.length > 0 ? activeStepsData.times[activeStepsData.times.length-1] : 0) + a.sec); 
+                } 
+            });
             renderSteps(0);
         }
 
@@ -381,31 +384,31 @@
             else { timer = setInterval(() => { seg++; document.getElementById('timer').innerText = `${Math.floor(seg/60).toString().padStart(2,'0')}:${(seg%60).toString().padStart(2,'0')}`; renderSteps(seg); }, 1000); document.getElementById('btn-timer-main').innerText="PAUSAR"; } 
         }
 
-        function setRating(n) { notaSelecionada = n; const stars = document.querySelectorAll('.star'); stars.forEach((s, i) => { if(i < n) s.classList.add('active'); else s.classList.remove('active'); }); }
-        function abrirFeedback() { if(timer){ clearInterval(timer); timer = null; } document.getElementById('modal-feedback').classList.remove('hidden'); }
-        function fecharFeedback() { document.getElementById('modal-feedback').classList.add('hidden'); seg=0; document.getElementById('timer').innerText="00:00"; upCalc(); setRating(0); document.getElementById('f-obs').value=""; }
-        
+        async function loadDiario() {
+            const snap = await db.collection('logs').where('owner_uid', '==', currentUser.uid).get();
+            let logs = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            logs.sort((a, b) => (b.ts ? b.ts.seconds : 0) - (a.ts ? a.ts.seconds : 0)); // Sort manual via JS
+            let h = ''; logs.forEach(i => { 
+                h += `<div class="card p-4 border-l-4 border-l-amber-600 shadow-none"><div class="text-[10px] text-zinc-500 font-bold">${i.data}</div><div class="text-lg font-black italic text-white leading-tight mt-1">${i.grao}</div><div class="text-xs font-bold text-amber-500 uppercase mt-1">${i.receita} | ${i.tempoTotal}</div><div class="grid grid-cols-4 gap-1 mt-2 text-[8px] font-black text-zinc-600"><div>DOC:${i.docura}</div><div>ACI:${i.acidez}</div><div>AMA:${i.amargor}</div><div>COR:${i.corpo}</div></div><p class="mt-2 text-xs italic text-zinc-400">"${i.observacoes || '--'}"</p><div class="mt-3 flex justify-between items-center"><div class="text-xl text-amber-500">${'★'.repeat(i.nota)}${'☆'.repeat(5-i.nota)}</div><button onclick='del("logs","${i.id}","Diário")' class="text-xs p-2 bg-zinc-900 rounded-lg text-red-800 font-black">🗑️</button></div></div>`; 
+            });
+            document.getElementById('list-logs').innerHTML = h;
+        }
+
         async function salvarFeedback() { 
             const g = document.getElementById('p-g'), r = document.getElementById('p-r'); if(g.value=="0"||r.value=="0") return alert("Selecione tudo!");
             await db.collection('logs').add({ grao: g.options[g.selectedIndex].text, receita: r.options[r.selectedIndex].text, tempoTotal: document.getElementById('timer').innerText, nota: notaSelecionada, observacoes: document.getElementById('f-obs').value.toUpperCase(), docura: document.getElementById('f-doce').value, acidez: document.getElementById('f-acidez').value, amargor: document.getElementById('f-amargor').value, corpo: document.getElementById('f-corpo').value, data: new Date().toLocaleString(), ts: firebase.firestore.FieldValue.serverTimestamp(), owner_uid: currentUser.uid });
             fecharFeedback(); showTab('diario');
         }
 
-        async function loadDiario() {
-            const snap = await db.collection('logs').where('owner_uid', '==', currentUser.uid).orderBy('ts', 'desc').get();
-            let h = ''; snap.forEach(d => { 
-                const i = d.data(); 
-                h += `<div class="card p-4 border-l-4 border-l-amber-600 shadow-none"><div class="text-[10px] text-zinc-500 font-bold">${i.data}</div><div class="text-lg font-black italic text-white mt-1">${i.grao}</div><div class="text-xs font-bold text-amber-500 uppercase mt-1">${i.receita} | ${i.tempoTotal}</div><div class="grid grid-cols-4 gap-1 mt-2 text-[8px] font-black text-zinc-600"><div>DOC:${i.docura}</div><div>ACI:${i.acidez}</div><div>AMA:${i.amargor}</div><div>COR:${i.corpo}</div></div><div class="mt-3 flex justify-between items-center"><div class="text-xl text-amber-500">${'★'.repeat(i.nota)}${'☆'.repeat(5-i.nota)}</div><button onclick='del("logs","${d.id}","Diário")' class="text-xs p-2 bg-zinc-900 rounded-lg text-red-800 font-black">🗑️</button></div></div>`; 
-            });
-            document.getElementById('list-logs').innerHTML = h;
-        }
-
+        function setRating(n) { notaSelecionada = n; const stars = document.querySelectorAll('.star'); stars.forEach((s, i) => { if(i < n) s.classList.add('active'); else s.classList.remove('active'); }); }
+        function abrirFeedback() { if(timer){ clearInterval(timer); timer = null; } document.getElementById('modal-feedback').classList.remove('hidden'); }
+        function fecharFeedback() { document.getElementById('modal-feedback').classList.add('hidden'); seg=0; document.getElementById('timer').innerText="00:00"; upCalc(); setRating(0); document.getElementById('f-obs').value=""; }
         function cancelEdit(t) { editIds[t] = null; document.getElementById(t+'-edit-actions').classList.add('hidden'); document.getElementById(t+'-btn-main').classList.remove('hidden'); if(t==='g') resetG(); else resetR(); }
         function resetG() { document.querySelectorAll('#tab-cafes input, #tab-cafes select, #tab-cafes textarea').forEach(el => el.value = ""); document.getElementById('g-photo-input').value = ""; }
         function resetR() { document.querySelectorAll('#tab-receitas input, #tab-receitas select').forEach(el => el.value = ""); document.getElementById('ataques-container').innerHTML = ''; document.getElementById('r-metodo-outro-div').classList.add('hidden'); }
         async function del(c, id, n) { if(confirm(`Excluir ${n}?`)) { await db.collection(c).doc(id).delete(); if(c==='cafes') loadG(); else if(c==='receitas') loadR(); else loadDiario(); } }
         function checkMetodo(s) { document.getElementById('r-metodo-outro-div').classList.toggle('hidden', s.value !== 'OUTROS'); }
-        function addAtackField(ml='', sec='', obs='') { document.getElementById('ataques-container').insertAdjacentHTML('beforeend', `<div class="bg-zinc-900 p-2 rounded-xl border border-zinc-800 atk-row"><div class="flex gap-2 items-center"><div class="flex-1"><span class="label-gold mt-0">ML</span><input type="number" class="atk-ml" value="${ml}"></div><div class="flex-1"><span class="label-gold mt-0">Tempo(s)</span><input type="number" class="atk-sec" value="${sec}"></div><button onclick="this.closest('.atk-row').remove()" class="text-zinc-600 font-bold px-2">X</button></div><span class="label-gold mt-1 text-[8px]">Observação desta etapa</span><input type="text" class="atk-obs" value="${obs}" style="font-size:12px; margin-bottom:0"></div>`); }
+        function addAtackField(ml='', sec='', obs='') { document.getElementById('ataques-container').insertAdjacentHTML('beforeend', `<div class="bg-zinc-900 p-2 rounded-xl border border-zinc-800 atk-row"><div class="flex gap-2 items-center"><div class="flex-1"><span class="label-gold mt-0 text-[8px]">ML</span><input type="number" class="atk-ml text-sm" value="${ml}"></div><div class="flex-1"><span class="label-gold mt-0 text-[8px]">TEMPO(S)</span><input type="number" class="atk-sec text-sm" value="${sec}"></div><button onclick="this.closest('.atk-row').remove()" class="text-zinc-600 font-bold px-2">X</button></div><span class="label-gold mt-1 text-[8px]">OBSERVAÇÃO DA ETAPA</span><input type="text" class="atk-obs text-xs" value="${obs}" style="margin-bottom:0"></div>`); }
         function handleFocus(el) { if(el.value === "--") el.value = ""; el.select(); }
         function fecharDetalhes() { document.getElementById('modal-detalhes').classList.add('hidden'); }
         function abrirDetalhes(id) { 
@@ -421,7 +424,6 @@
         function openPix(){ document.getElementById('pix-modal').classList.remove('hidden'); const qr = document.getElementById("pix-qrcode"); qr.innerHTML = ""; new QRCode(qr, {text: "00020101021126480014br.gov.bcb.pix0119alanpocos@gmail.com5204000053039865802BR5930ALAN DOUGLAS PEREIRA RODRIGUES6005POCOS6304", width: 180, height: 180, colorDark : "#000000", colorLight : "#ffffff"}); }
         function closePix(){ document.getElementById('pix-modal').classList.add('hidden'); }
         function copyPix(){ navigator.clipboard.writeText("alanpocos@gmail.com"); alert('Pix copiado!'); }
-        function filterList(tab) { if(tab==='g') loadG(); if(tab==='r') loadR(); }
     </script>
 </body>
 </html>
