@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.0 - Overseer</title>
+    <title>Coffee Master v10.1 - Full Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -80,7 +80,7 @@
             <button id="btn-admin" class="tab-btn hidden" onclick="showTab('admin')">ADMIN</button>
         </div>
 
-        <!-- ABA GRÃOS -->
+        <!-- ABAS (MESMA LÓGICA v10.1) -->
         <div id="tab-cafes">
             <div class="card p-4">
                 <span class="label-gold mt-0">Produtor</span><input type="text" id="g-prod">
@@ -159,35 +159,31 @@
 
         <!-- ABA ADMIN -->
         <div id="tab-admin" class="hidden">
-            <h2 class="text-amber-500 font-black italic uppercase text-lg mb-4">Central do Mestre</h2>
-            <div class="grid grid-cols-2 gap-2 mb-6">
-                <div class="card p-4 text-center">
-                    <span class="label-gold mt-0">Usuários</span>
-                    <div id="admin-user-count" class="text-3xl font-black italic text-white">0</div>
-                </div>
-                <div class="card p-4 text-center">
-                    <span class="label-gold mt-0">Receitas Totais</span>
-                    <div id="admin-total-receitas" class="text-3xl font-black italic text-white">0</div>
-                </div>
+            <h2 class="text-amber-500 font-black italic uppercase text-lg mb-4 text-left">Central do Mestre</h2>
+            <div class="grid grid-cols-2 gap-2 mb-6 text-center">
+                <div class="card p-4"><span class="label-gold mt-0">Usuários</span><div id="admin-user-count" class="text-3xl font-black italic text-white">0</div></div>
+                <div class="card p-4"><span class="label-gold mt-0">Receitas</span><div id="admin-total-receitas" class="text-3xl font-black italic text-white">0</div></div>
             </div>
-            <span class="label-gold">Membros da Comunidade</span>
+            <span class="label-gold text-left">Membros Cadastrados</span>
             <div id="admin-user-list" class="space-y-2"></div>
         </div>
     </div>
 
-    <!-- MODAL DETALHES USUARIO (ADMIN) -->
+    <!-- MODAL DETALHES USUARIO (ADMIN ONLY) -->
     <div id="admin-user-details" class="hidden">
-        <div class="card w-full max-w-sm mx-auto shadow-2xl border-amber-500">
+        <div class="card w-full max-w-sm mx-auto shadow-2xl border-amber-500 bg-black" style="max-height: 85vh; overflow-y: auto;">
             <div class="flex justify-between items-center mb-6">
-                <h3 id="admin-detail-nick" class="text-amber-500 font-black italic uppercase text-xl">Davi</h3>
+                <h3 id="admin-detail-nick" class="text-amber-500 font-black italic uppercase text-xl">USUÁRIO</h3>
                 <button onclick="fecharAdminUser()" class="text-zinc-600 font-black text-xl">X</button>
             </div>
-            <div id="admin-detail-type" class="text-[10px] font-black text-zinc-500 uppercase italic mb-4"></div>
-            <div class="space-y-4">
-                <div><span class="label-gold mt-0">Grãos Cadastrados</span><div id="admin-detail-grains" class="space-y-1 mt-2"></div></div>
-                <div><span class="label-gold mt-0">Receitas</span><div id="admin-detail-recipes" class="space-y-1 mt-2"></div></div>
+            <div id="admin-detail-type" class="text-[10px] font-black text-zinc-500 uppercase italic mb-6 border-b border-zinc-800 pb-2 text-left"></div>
+            
+            <div class="space-y-6 text-left">
+                <div><span class="label-gold mt-0">Estoque de Grãos</span><div id="admin-detail-grains" class="space-y-1 mt-2"></div></div>
+                <div><span class="label-gold mt-0">Livro de Receitas</span><div id="admin-detail-recipes" class="space-y-1 mt-2"></div></div>
+                <div><span class="label-gold mt-0">Logs do Diário (Privado)</span><div id="admin-detail-logs" class="space-y-2 mt-2"></div></div>
             </div>
-            <button class="btn-gold w-full mt-8" onclick="fecharAdminUser()">VOLTAR</button>
+            <button class="btn-gold w-full mt-10" onclick="fecharAdminUser()">VOLTAR</button>
         </div>
     </div>
 
@@ -211,7 +207,7 @@
             if (user) {
                 currentUser = user;
                 const p = await db.collection('users').doc(user.uid).get();
-                userProfile = p.data() || { nick: 'Mestre', type: 'comunidade' };
+                userProfile = p.data() || { nick: 'Visitante', type: 'comunidade' };
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('user-display').innerText = `@${userProfile.nick} (${userProfile.type})`;
@@ -248,13 +244,11 @@
             data.forEach(i => {
                 const isOwner = i.owner_uid === currentUser.uid;
                 const isAdmin = currentUser.email === ADMIN_EMAIL;
-                // ETIQUETA RAIO-X
                 let tag = ""; if(isAdmin) tag = `<span class="admin-tag">${i.visibilidade === 'privado' ? '[P]' : '[C]'}</span>`;
-
                 if(userProfile.type === 'pessoal' || i.visibilidade === 'publico' || isOwner || isAdmin) {
                     h += `<div class="card p-3 flex gap-3 items-center border border-zinc-800 h-[115px]">
                         <div class="flex-1 min-w-0" onclick="abrirDetalhes('${i.id}')">
-                            <div class="text-[8px] text-zinc-600 font-black uppercase truncate">${i.prod || '--'} • @${i.owner_nick || 'Admin'}${tag}</div>
+                            <div class="text-[8px] text-zinc-600 font-black uppercase truncate">${i.prod || '--'} • @${i.owner_nick || 'Mestre'}${tag}</div>
                             <div class="text-base font-black italic uppercase text-white mt-1 leading-tight line-clamp-2">${i.nome}</div>
                             <div class="text-[8px] text-amber-600 font-bold uppercase mt-1 truncate">${i.variedade || '--'} | ${i.processo || '--'} | ${i.torrefacao || '--'}</div>
                         </div>
@@ -280,22 +274,19 @@
                 const isOwner = i.owner_uid === currentUser.uid;
                 const isAdmin = currentUser.email === ADMIN_EMAIL;
                 let tag = ""; if(isAdmin) tag = `<span class="admin-tag">${i.visibilidade === 'privado' ? '[P]' : '[C]'}</span>`;
-
                 if(userProfile.type === 'pessoal' || i.visibilidade === 'publico' || isOwner || isAdmin) {
-                    h += `<div class="card p-3 flex justify-between items-center h-[85px]"><div class="flex-1 min-w-0"><div class="text-lg font-black italic uppercase text-amber-500 truncate">${i.nome}</div><div class="text-[8px] text-zinc-600 font-black uppercase mt-1">por @${i.owner_nick || 'Admin'}${tag} | ${i.metodo}</div></div><div class="flex gap-2"> ${isOwner || isAdmin ? `<button onclick="editR('${i.id}')" class="p-2 bg-zinc-900 rounded-lg text-xs">✏️</button><button onclick="del('receitas','${i.id}','${i.nome}')" class="p-2 bg-zinc-900 rounded-lg text-xs">🗑️</button>` : ''} <button onclick="showTab('preparo'); handleRecipeSelect('${i.id}')" class="text-xs font-black p-2 bg-amber-600 text-black rounded-lg italic uppercase">Preparar</button> </div></div>`;
+                    h += `<div class="card p-3 flex justify-between items-center h-[85px]"><div class="flex-1 min-w-0"><div class="text-lg font-black italic uppercase text-amber-500 truncate">${i.nome}</div><div class="text-[8px] text-zinc-600 font-black uppercase mt-1">por @${i.owner_nick || 'Mestre'}${tag} | ${i.metodo}</div></div><div class="flex gap-2"> ${isOwner || isAdmin ? `<button onclick="editR('${i.id}')" class="p-2 bg-zinc-900 rounded-lg text-xs">✏️</button><button onclick="del('receitas','${i.id}','${i.nome}')" class="p-2 bg-zinc-900 rounded-lg text-xs">🗑️</button>` : ''} <button onclick="showTab('preparo'); handleRecipeSelect('${i.id}')" class="text-xs font-black p-2 bg-amber-600 text-black rounded-lg italic uppercase">Preparar</button> </div></div>`;
                 }
             });
             document.getElementById('list-r').innerHTML = h;
         }
 
-        // --- ADMIN SECTION ---
         async function loadAdmin() {
             if(currentUser.email !== ADMIN_EMAIL) return;
             const users = await db.collection('users').get();
             const receitas = await db.collection('receitas').get();
             document.getElementById('admin-user-count').innerText = users.size;
             document.getElementById('admin-total-receitas').innerText = receitas.size;
-            
             let h = '';
             users.forEach(d => {
                 const u = d.data();
@@ -312,19 +303,21 @@
             const u = user.data();
             document.getElementById('admin-detail-nick').innerText = `@${u.nick}`;
             document.getElementById('admin-detail-type').innerText = u.type === 'pessoal' ? "CONTA PRIVADA (PESSOAL)" : "CONTA PÚBLICA (COMUNIDADE)";
-            
             const gs = localData.g.filter(x => x.owner_uid === uid);
             const rs = localData.r.filter(x => x.owner_uid === uid);
-            
-            document.getElementById('admin-detail-grains').innerHTML = gs.map(g => `<div class="bg-zinc-900 p-2 rounded text-[10px] flex justify-between"><span>${g.nome}</span><div class="flex gap-2"><button onclick="editG('${g.id}'); fecharAdminUser();">✏️</button><button onclick="del('cafes','${g.id}','${g.nome}')">🗑️</button></div></div>`).join('') || '<span class="text-[8px] text-zinc-700">SEM GRÃOS</span>';
-            document.getElementById('admin-detail-recipes').innerHTML = rs.map(r => `<div class="bg-zinc-900 p-2 rounded text-[10px] flex justify-between"><span>${r.nome}</span><div class="flex gap-2"><button onclick="editR('${r.id}'); fecharAdminUser();">✏️</button><button onclick="del('receitas','${r.id}','${r.nome}')">🗑️</button></div></div>`).join('') || '<span class="text-[8px] text-zinc-700">SEM RECEITAS</span>';
-            
+            document.getElementById('admin-detail-grains').innerHTML = gs.map(g => `<div class="bg-zinc-900 p-2 rounded text-[10px] flex justify-between"><span>${g.nome}</span><div class="flex gap-2"><button onclick="editG('${g.id}'); fecharAdminUser();">✏️</button><button onclick="del('cafes','${g.id}','${g.nome}')">🗑️</button></div></div>`).join('') || '<span class="text-[8px] text-zinc-700">NADA CADASTRADO</span>';
+            document.getElementById('admin-detail-recipes').innerHTML = rs.map(r => `<div class="bg-zinc-900 p-2 rounded text-[10px] flex justify-between"><span>${r.nome}</span><div class="flex gap-2"><button onclick="editR('${r.id}'); fecharAdminUser();">✏️</button><button onclick="del('receitas','${r.id}','${r.nome}')">🗑️</button></div></div>`).join('') || '<span class="text-[8px] text-zinc-700">NADA CADASTRADO</span>';
+            const logsSnap = await db.collection('logs').where('owner_uid', '==', uid).get();
+            let lh = '';
+            logsSnap.forEach(l => {
+                const log = l.data();
+                lh += `<div class="bg-zinc-900 p-3 rounded border border-zinc-800 mb-2"><div class="flex justify-between items-center"><span class="text-[8px] text-zinc-500 font-black uppercase">${log.data.split(',')[0]}</span><span class="text-amber-500 text-[10px]">${'★'.repeat(log.nota)}</span></div><div class="text-[10px] font-bold italic mt-1 text-white">${log.grao}</div><div class="text-[8px] text-zinc-400 italic mt-1">"${log.observacoes || '--'}"</div></div>`;
+            });
+            document.getElementById('admin-detail-logs').innerHTML = lh || '<span class="text-[8px] text-zinc-700">SEM REGISTROS NO DIÁRIO</span>';
             document.getElementById('admin-user-details').classList.remove('hidden');
         }
 
         function fecharAdminUser() { document.getElementById('admin-user-details').classList.add('hidden'); }
-
-        // --- MANUTENÇÃO (COMO v9.9) ---
         async function processImage(file) { return new Promise((resolve) => { const reader = new FileReader(); reader.onload = (e) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); const size = 200; canvas.width = size; canvas.height = size; const ctx = canvas.getContext('2d'); const min = Math.min(img.width, img.height); ctx.drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, size, size); resolve(canvas.toDataURL('image/jpeg', 0.7)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }); }
         function editG(id) { const i = localData.g.find(x => x.id === id); if(!i) return; editIds.g = id; document.getElementById('g-prod').value = i.prod; document.getElementById('g-nome').value = i.nome; document.getElementById('g-variedade').value = i.variedade; document.getElementById('g-processo').value = i.processo; document.getElementById('g-altitude').value = i.altitude; document.getElementById('g-torrefacao').value = i.torrefacao; document.getElementById('g-torra').value = i.torra; document.getElementById('g-data').value = i.data; document.getElementById('g-notas').value = i.notas; document.getElementById('g-edit-actions').classList.remove('hidden'); document.getElementById('g-btn-main').classList.add('hidden'); showTab('cafes'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
         async function saveG() { const photoFile = document.getElementById('g-photo-input').files[0]; let photoBase64 = null; if(photoFile) photoBase64 = await processImage(photoFile); const d = { prod: document.getElementById('g-prod').value.toUpperCase(), nome: document.getElementById('g-nome').value.toUpperCase(), variedade: document.getElementById('g-variedade').value.toUpperCase(), processo: document.getElementById('g-processo').value.toUpperCase(), altitude: document.getElementById('g-altitude').value.toUpperCase(), torrefacao: document.getElementById('g-torrefacao').value.toUpperCase(), torra: document.getElementById('g-torra').value, data: document.getElementById('g-data').value, notas: document.getElementById('g-notas').value.toUpperCase(), ts: firebase.firestore.FieldValue.serverTimestamp(), owner_uid: editIds.g ? localData.g.find(x=>x.id===editIds.g).owner_uid : currentUser.uid, owner_nick: editIds.g ? localData.g.find(x=>x.id===editIds.g).owner_nick : userProfile.nick, visibilidade: userProfile.type === 'pessoal' ? 'privado' : 'publico' }; if(photoBase64) d.photo = photoBase64; if (editIds.g) await db.collection('cafes').doc(editIds.g).update(d); else await db.collection('cafes').add(d); cancelEdit('g'); loadG(); }
