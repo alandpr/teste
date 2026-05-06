@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.3 - Sync Master</title>
+    <title>Coffee Master v10.4 - App Edition</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f59e0b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -36,7 +39,7 @@
 </head>
 <body class="p-3 max-w-lg mx-auto">
 
-    <!-- MODAL DETALHES GRÃO -->
+    <!-- MODAL DETALHES -->
     <div id="modal-detalhes" class="hidden" onclick="fecharDetalhes()"><div class="card w-full max-w-sm mx-auto border-amber-500 shadow-[0_0_50px_rgba(245,158,11,0.1)]" onclick="event.stopPropagation()"><h3 class="text-amber-500 font-black italic uppercase text-xl mb-4">Ficha Técnica</h3><div id="detalhes-content" class="space-y-4 text-left"></div><button class="btn-gold w-full mt-8" onclick="fecharDetalhes()">VOLTAR</button></div></div>
 
     <!-- TELA LOGIN -->
@@ -53,7 +56,7 @@
                 <span class="label-gold mt-0">Nickname</span><input type="text" id="sign-nick">
                 <span class="label-gold">E-mail</span><input type="email" id="sign-email">
                 <span class="label-gold">Senha</span><input type="password" id="sign-pass">
-                <span class="label-gold">Escolha seu Perfil</span>
+                <span class="label-gold">Perfil</span>
                 <select id="sign-type" onchange="updateProfileInfo(this)"><option value="" disabled selected>SELECIONAR</option><option value="pessoal">PESSOAL (PRIVADO)</option><option value="comunidade">COMUNIDADE (PÚBLICO)</option></select>
                 <div id="profile-info" class="text-[9px] font-bold text-amber-600 uppercase mt-2 italic px-2 min-h-[30px]"></div>
                 <button class="btn-gold w-full mt-6" onclick="handleSignup()">Criar Conta</button>
@@ -80,7 +83,6 @@
             <button id="btn-admin" class="tab-btn hidden" onclick="showTab('admin')">ADMIN</button>
         </div>
 
-        <!-- ABA GRÃOS -->
         <div id="tab-cafes">
             <div class="card p-4">
                 <span class="label-gold mt-0">Produtor</span><input type="text" id="g-prod">
@@ -105,7 +107,6 @@
             <div id="list-g" class="space-y-3"></div>
         </div>
 
-        <!-- ABA RECEITAS -->
         <div id="tab-receitas" class="hidden">
             <div class="card p-4">
                 <span class="label-gold mt-0">Nome da Receita</span><input type="text" id="r-nome">
@@ -136,7 +137,6 @@
             <div id="list-r" class="space-y-3"></div>
         </div>
 
-        <!-- ABA PREPARAR -->
         <div id="tab-preparo" class="hidden">
             <div class="card border-amber-600 bg-black p-5">
                 <select id="p-g" onchange="upCalc()"></select><select id="p-r" onchange="handleRecipeSelect()"></select>
@@ -171,24 +171,21 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHES USUARIO (ADMIN) -->
+    <!-- MODAL DETALHES USUARIO (ADMIN ONLY) -->
     <div id="admin-user-details" class="hidden">
         <div class="card w-full max-w-sm mx-auto shadow-2xl border-amber-500 bg-black" style="max-height: 85vh; overflow-y: auto;">
-            <div class="flex justify-between items-center mb-6">
-                <h3 id="admin-detail-nick" class="text-amber-500 font-black italic uppercase text-xl">USUÁRIO</h3>
-                <button onclick="fecharAdminUser()" class="text-zinc-600 font-black text-xl">X</button>
-            </div>
+            <div class="flex justify-between items-center mb-6"><h3 id="admin-detail-nick" class="text-amber-500 font-black italic uppercase text-xl">USUÁRIO</h3><button onclick="fecharAdminUser()" class="text-zinc-600 font-black text-xl">X</button></div>
             <div id="admin-detail-type" class="text-[10px] font-black text-zinc-500 uppercase italic mb-6 border-b border-zinc-800 pb-2 text-left"></div>
             <div class="space-y-6 text-left">
                 <div><span class="label-gold mt-0">Estoque de Grãos</span><div id="admin-detail-grains" class="space-y-1 mt-2"></div></div>
                 <div><span class="label-gold mt-0">Livro de Receitas</span><div id="admin-detail-recipes" class="space-y-1 mt-2"></div></div>
-                <div><span class="label-gold mt-0">Logs do Diário (Privado)</span><p class="text-[8px] text-zinc-600 mb-2 font-bold italic">CLIQUE PARA VER DETALHES SENSORIAIS</p><div id="admin-detail-logs" class="space-y-2 mt-2"></div></div>
+                <div><span class="label-gold mt-0">Logs do Diário (Privado)</span><p class="text-[8px] text-zinc-600 mb-2 font-bold italic">CLIQUE PARA DETALHES</p><div id="admin-detail-logs" class="space-y-2 mt-2"></div></div>
             </div>
             <button class="btn-gold w-full mt-10" onclick="fecharAdminUser()">VOLTAR</button>
         </div>
     </div>
 
-    <!-- MODAL LOG COMPLETO (ADMIN) -->
+    <!-- MODAL LOG COMPLETO (ADMIN ONLY) -->
     <div id="admin-log-details" class="hidden" onclick="this.classList.add('hidden')">
         <div class="card w-full max-w-sm mx-auto shadow-2xl border-amber-500 bg-zinc-900" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-6"><h3 class="text-amber-500 font-black italic uppercase text-xl">Ficha do Diário</h3><button onclick="document.getElementById('admin-log-details').classList.add('hidden')" class="text-zinc-600 font-black text-xl">X</button></div>
@@ -202,6 +199,13 @@
     </div>
 
     <script>
+        // SERVICE WORKER REGISTRATION
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW OK'), err => console.log('SW FAIL'));
+          });
+        }
+
         const config = { apiKey: "AIzaSyCbIsrGjuu6KN-A0xpZUC6ID9aOHBEIJSE", authDomain: "coffee-master-e1f5c.firebaseapp.com", projectId: "coffee-master-e1f5c", storageBucket: "coffee-master-e1f5c.firebasestorage.app", messagingSenderId: "171441357303", appId: "1:171441357303:web:c85dc841ee73f6f29e2ef2" };
         firebase.initializeApp(config); const db = firebase.firestore(); const auth = firebase.auth();
         let currentUser = null, userProfile = null, timer = null, seg = 0, editIds = { g: null, r: null }, localData = { g: [], r: [], logs: [] }, activeStepsData = { steps: [], times: [] }, notaSelecionada = 0;
@@ -276,10 +280,7 @@
 
         async function loadPrep() { 
             const gc = await db.collection('cafes').get(), rc = await db.collection('receitas').get(); 
-            // SYNC MASTER: Atualiza a memória local SEMPRE que carrega o preparo
-            localData.g = gc.docs.map(d => ({id: d.id, ...d.data()}));
-            localData.r = rc.docs.map(d => ({id: d.id, ...d.data()}));
-
+            localData.g = gc.docs.map(d => ({id: d.id, ...d.data()})); localData.r = rc.docs.map(d => ({id: d.id, ...d.data()}));
             let gh = '<option value="0">SELECIONE O GRÃO</option>', rh = '<option value="0">SELECIONE A RECEITA</option>'; 
             gc.forEach(d => { const data = d.data(); if(data.owner_uid === currentUser.uid || data.visibilidade === 'publico' || currentUser.email === ADMIN_EMAIL) gh += `<option value="${d.id}">${data.nome}</option>`; }); 
             rc.forEach(d => { const data = d.data(); if(data.owner_uid === currentUser.uid || data.visibilidade === 'publico' || currentUser.email === ADMIN_EMAIL) rh += `<option value="${d.id}">${data.nome}</option>`; }); 
@@ -346,7 +347,6 @@
             document.getElementById('admin-log-details').classList.remove('hidden');
         }
 
-        // MANUTENCAO (OUTRAS FUNCOES)
         function fecharAdminUser() { document.getElementById('admin-user-details').classList.add('hidden'); }
         async function processImage(file) { return new Promise((resolve) => { const reader = new FileReader(); reader.onload = (e) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = 200; canvas.height = 200; const ctx = canvas.getContext('2d'), min = Math.min(img.width, img.height); ctx.drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, 200, 200); resolve(canvas.toDataURL('image/jpeg', 0.7)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }); }
         function editG(id) { const i = localData.g.find(x => x.id === id); if(!i) return; editIds.g = id; document.getElementById('g-prod').value = i.prod; document.getElementById('g-nome').value = i.nome; document.getElementById('g-variedade').value = i.variedade; document.getElementById('g-processo').value = i.processo; document.getElementById('g-altitude').value = i.altitude; document.getElementById('g-torrefacao').value = i.torrefacao; document.getElementById('g-torra').value = i.torra; document.getElementById('g-data').value = i.data; document.getElementById('g-notas').value = i.notas; document.getElementById('g-edit-actions').classList.remove('hidden'); document.getElementById('g-btn-main').classList.add('hidden'); showTab('cafes'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
