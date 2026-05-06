@@ -1,6 +1,6 @@
 {
   "name": "Coffee Master",
-  "short_name": "CoffeeMaster",
+  "short_name": "CoffeeMasterteste",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
