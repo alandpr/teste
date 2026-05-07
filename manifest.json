@@ -1,20 +1,25 @@
 {
-  "name": "Coffee Master Teste",
-  "short_name": "CM Teste",
+  "name": "Coffee Master",
+  "short_name": "CoffeeMaster",
+  "id": "/index.html",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#f59e0b",
+  "description": "Gerenciador de Receitas de Café Especial",
+  "orientation": "portrait",
   "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3233/3233486.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
     {
       "src": "https://cdn-icons-png.flaticon.com/192/3233/3233486.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3233/3233486.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
