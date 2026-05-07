@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.7 - Correcao</title>
+    <title>Coffee Master v10.8 - PWA</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -102,7 +102,7 @@
             <div id="list-g" class="space-y-3"></div>
         </div>
 
-        <!-- ABA RECEITAS (COM A CORREÇÃO MATEMÁTICA AQUI) -->
+        <!-- ABA RECEITAS -->
         <div id="tab-receitas" class="hidden">
             <div class="card p-4">
                 <span class="label-gold mt-0">Nome</span><input type="text" id="r-nome">
@@ -110,7 +110,6 @@
                 <div id="r-metodo-outro-div" class="hidden mt-2"><input type="text" id="r-metodo-outro"></div>
                 <div class="bg-zinc-900 p-3 rounded-xl border border-dashed border-zinc-700 mt-4 space-y-4">
                     <div class="grid grid-cols-3 gap-2">
-                        <!-- ADICIONADO oninput="calcTotalR()" AQUI -->
                         <div><span class="label-gold mt-0">Ratio</span><input type="number" id="r-ratio-base" step="0.1" oninput="calcTotalR()"></div>
                         <div><span class="label-gold mt-0">Pó (g)</span><input type="number" id="r-po-base" oninput="calcTotalR()"></div>
                         <div><span class="label-gold mt-0">Total</span><input type="number" id="r-total-base" readonly class="text-amber-500 font-bold bg-transparent border-none"></div>
@@ -167,7 +166,7 @@
         </div>
     </div>
 
-    <!-- MODAIS ADMIN E FEEDBACK COMPLETO ABAIXO -->
+    <!-- MODAIS ADMIN E FEEDBACK COMPLETO -->
     <div id="admin-user-details" class="hidden">
         <div class="card w-full max-w-sm mx-auto shadow-2xl border-amber-500 bg-black" style="max-height: 85vh; overflow-y: auto;">
             <div class="flex justify-between items-center mb-6"><h3 id="admin-detail-nick" class="text-amber-500 font-black italic uppercase text-xl">USUÁRIO</h3><button onclick="fecharAdminUser()" class="text-zinc-600 font-black text-xl">X</button></div>
@@ -210,14 +209,15 @@
         </div>
     </div>
 
-    <!-- SCRIPT COM A LÓGICA ORIGINAL E A FUNÇÃO DE CÁLCULO -->
+    <!-- SCRIPT DA INSTALAÇÃO -->
     <script>
-        // SERVICE WORKER PARA PWA
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker Registrado!', reg))
-            .catch(err => console.error('Falha no Service Worker', err));
-        }
+        window.addEventListener('load', () => {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+              .then(reg => console.log('SW registado!', reg))
+              .catch(err => console.error('Erro no SW:', err));
+          }
+        });
 
         const config = { apiKey: "AIzaSyCbIsrGjuu6KN-A0xpZUC6ID9aOHBEIJSE", authDomain: "coffee-master-e1f5c.firebaseapp.com", projectId: "coffee-master-e1f5c", storageBucket: "coffee-master-e1f5c.firebasestorage.app", messagingSenderId: "171441357303", appId: "1:171441357303:web:c85dc841ee73f6f29e2ef2" };
         firebase.initializeApp(config); const db = firebase.firestore(); const auth = firebase.auth();
@@ -287,7 +287,7 @@
             document.getElementById('p-g').innerHTML = gh; document.getElementById('p-r').innerHTML = rh; 
         }
 
-        // === NOVA FUNÇÃO: CALCULAR TOTAL DA RECEITA AUTOMATICAMENTE ===
+        // --- CÁLCULO DE TOTAL DA RECEITA ---
         function calcTotalR() {
             const r = parseFloat(document.getElementById('r-ratio-base').value) || 0;
             const p = parseFloat(document.getElementById('r-po-base').value) || 0;
@@ -296,7 +296,6 @@
                 totalField.value = Math.round(r * p);
             }
         }
-        // ================================================================
 
         function handleRecipeSelect(rid) { 
             if(rid) document.getElementById('p-r').value = rid;
