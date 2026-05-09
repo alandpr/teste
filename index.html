@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.17</title>
+    <title>Coffee Master v10.18</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -150,7 +150,7 @@
             let h = ''; data.forEach(i => {
                 const isOwner = i.owner_uid === currentUser.uid || currentUser.email === ADMIN_EMAIL;
                 const img = (i.photo && i.photo.length > 100) ? i.photo : DEFAULT_IMG;
-                h += `<div class="card p-3 flex gap-3 items-center border border-zinc-800"><div class="flex-1 min-w-0 cursor-pointer" onclick="abrirDetalhesG('${i.id}')"><div class="text-[8px] text-zinc-600 font-black uppercase truncate">${i.prod || '--'} • @${i.owner_nick || 'Mestre'}</div><div class="text-base font-black italic uppercase text-white truncate leading-tight">${i.nome}</div><div class="text-[8px] text-amber-500 font-black uppercase mt-1 truncate">${i.variedade || '--'} | ${i.processo || '--'} | ${i.torrefacao || '--'}</div></div><img src="${img}" class="grain-thumb"><div class="flex flex-col gap-1">${isOwner ? `<button onclick="editG('${i.id}')" class="p-2 bg-zinc-900 rounded-lg text-xs">✏️</button><button onclick="del('cafes','${i.id}','${i.nome}')" class="p-2 bg-zinc-900 rounded-lg text-xs">🗑️</button>` : ''}</div></div>`;
+                h += `<div class="card p-3 flex gap-3 items-center border border-zinc-800"><div class="flex-1 min-w-0 cursor-pointer" onclick="abrirDetalhesG('${i.id}')"><div class="text-[8px] text-white font-black uppercase truncate">${i.prod || '--'} • @${i.owner_nick || 'Mestre'}</div><div class="text-base font-black italic uppercase text-white truncate leading-tight">${i.nome}</div><div class="text-[8px] text-amber-500 font-black uppercase mt-1 truncate">${i.variedade || '--'} | ${i.processo || '--'} | ${i.torrefacao || '--'}</div></div><img src="${img}" class="grain-thumb"><div class="flex flex-col gap-1">${isOwner ? `<button onclick="editG('${i.id}')" class="p-2 bg-zinc-900 rounded-lg text-xs">✏️</button><button onclick="del('cafes','${i.id}','${i.nome}')" class="p-2 bg-zinc-900 rounded-lg text-xs">🗑️</button>` : ''}</div></div>`;
             }); document.getElementById('list-g').innerHTML = h;
         }
 
@@ -239,7 +239,7 @@
                     <div><span class="label-gold">VARIEDADE</span><p class="text-white font-bold italic text-sm">${i.variedade||'--'}</p></div>
                     <div><span class="label-gold">PROCESSO</span><p class="text-white font-bold italic text-sm">${i.processo||'--'}</p></div>
                 </div>
-                <div><span class="label-gold">ALTITUDE | TORRA</span><p class="text-amber-500 font-bold italic text-sm">${i.altitude||'--'} | ${i.torra||'--'}</p></div>
+                <div><span class="label-gold">ALTITUDE | TORRA</span><p class="text-white font-bold italic text-sm">${i.altitude||'--'} | ${i.torra||'--'}</p></div>
                 <div><span class="label-gold">NOTAS</span><p class="text-zinc-400 italic text-sm">"${i.notas||'--'}"</p></div>
             `; 
             document.getElementById('modal-detalhes').classList.remove('hidden'); 
