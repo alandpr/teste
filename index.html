@@ -3,171 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.10</title>
+    <title>Coffee Master v10.14</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body { background: #0a0a0a; color: #fff; font-family: sans-serif; padding-bottom: 120px; zoom: 1.15; overflow-x: hidden; }
         .card { background: #161616; border-radius: 18px; padding: 14px; margin-bottom: 12px; border: 1px solid #262626; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         .label-gold { color: #f59e0b; font-size: 9px; font-weight: 900; text-transform: uppercase; margin-top: 20px; margin-bottom: 4px; margin-left: 6px; letter-spacing: 1px; display: block; }
-        .label-gold:first-child { margin-top: 0; }
         input, select, textarea { background: #222; border: 2px solid #333; color: #fff; padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 4px; font-size: 16px; font-weight: 900; font-style: italic; -webkit-appearance: none; }
-        input:focus { border-color: #f59e0b; outline: none; }
         .btn-gold { background: #f59e0b; color: #000; font-weight: 900; padding: 18px; border-radius: 18px; width: 100%; text-transform: uppercase; font-size: 14px; margin-top: 15px; cursor: pointer; }
         .tab-btn { background: #111; color: #444; flex: 1; padding: 14px 5px; border-radius: 14px; font-size: 10px; font-weight: 900; margin: 3px; border: 1px solid #222; }
         .active-tab { background: #f59e0b; color: #000; border-color: #fbbf24; }
-        .step-box { background: #161616; padding: 12px; border-radius: 16px; text-align: center; border: 2px solid #262626; width: 145px; flex-shrink: 0; transition: all 0.4s; }
-        .step-box-active { border-color: #f59e0b !important; background: #221a05; box-shadow: 0 0 20px rgba(245,158,11,0.15); }
-        #auth-screen, #modal-feedback, #pix-modal, #modal-detalhes, #admin-user-details, #admin-log-details { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; z-index: 2000; padding: 20px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
-        .hidden { display: none !important; }
-        .star { font-size: 35px; cursor: pointer; color: #333; padding: 5px; }
-        .star.active { color: #f59e0b; }
-        .search-input { background: #000; border: 1px solid #333; font-size: 11px; padding: 10px; border-radius: 10px; text-transform: uppercase; margin-bottom: 15px; }
-        input[type=range] { -webkit-appearance: none; background: #333; height: 6px; border-radius: 5px; margin: 10px 0; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #f59e0b; }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .grain-thumb { width: 65px; height: 65px; border-radius: 14px; object-fit: cover; background: #222; border: 1px solid #333; flex-shrink: 0; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .admin-tag { font-size: 7px; background: #222; color: #f59e0b; padding: 2px 4px; border-radius: 4px; margin-left: 4px; vertical-align: middle; border: 0.5px solid #f59e0b; }
+        #modal-detalhes, #modal-zoom, #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; z-index: 2000; padding: 20px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
+        #modal-zoom { background: rgba(0,0,0,0.95); z-index: 3000; align-items: center; justify-content: center; padding: 0; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="p-3 max-w-lg mx-auto">
-    <!-- MODAL DE DETALHES -->
-    <div id="modal-detalhes" class="hidden" onclick="fecharDetalhes()"><div class="card w-full max-w-sm mx-auto border-amber-500 shadow-[0_0_50px_rgba(245,158,11,0.1)]" onclick="event.stopPropagation()"><h3 class="text-amber-500 font-black italic uppercase text-xl mb-4">Ficha Técnica</h3><div id="detalhes-content" class="space-y-4 text-left"></div><button class="btn-gold w-full mt-8" onclick="fecharDetalhes()">VOLTAR</button></div></div>
-    
+
+    <div id="modal-zoom" class="hidden" onclick="this.classList.add('hidden')">
+        <img id="img-ampliada" class="max-w-[95%] max-h-[80%] rounded-2xl border-2 border-amber-500 shadow-2xl">
+    </div>
+
+    <div id="modal-detalhes" class="hidden" onclick="fecharDetalhes()">
+        <div class="card w-full max-w-sm mx-auto border-amber-500" onclick="event.stopPropagation()">
+            <h3 class="text-amber-500 font-black italic uppercase text-xl mb-4 text-center">Ficha Técnica</h3>
+            <div id="detalhes-content" class="space-y-4"></div>
+            <button class="btn-gold w-full mt-8" onclick="fecharDetalhes()">VOLTAR</button>
+        </div>
+    </div>
+
     <div id="auth-screen">
-        <div class="card w-full max-w-sm mx-auto border-amber-600 text-center">
+        <div class="card w-full max-w-sm mx-auto text-center">
             <h1 class="text-3xl font-black text-amber-500 italic uppercase mb-8">COFFEE MASTER</h1>
             <div id="login-form">
-                <span class="label-gold mt-0 text-left">E-mail</span><input type="email" id="login-email">
-                <span class="label-gold text-left">Senha</span><input type="password" id="login-pass">
+                <input type="email" id="login-email" placeholder="E-MAIL">
+                <input type="password" id="login-pass" placeholder="SENHA">
                 <button class="btn-gold w-full mt-6" onclick="handleLogin()">Entrar</button>
-                <p class="text-[10px] text-center mt-6 font-black uppercase text-zinc-500">Novo? <button class="text-amber-500 underline" onclick="toggleAuth(false)">Criar agora</button></p>
+                <p class="text-[10px] mt-6 uppercase text-zinc-500">Novo? <button class="text-amber-500" onclick="toggleAuth(false)">Criar agora</button></p>
             </div>
-            <div id="signup-form" class="hidden text-left">
-                <span class="label-gold mt-0">Nickname</span><input type="text" id="sign-nick">
-                <span class="label-gold">E-mail</span><input type="email" id="sign-email">
-                <span class="label-gold">Senha</span><input type="password" id="sign-pass">
-                <span class="label-gold">Perfil</span>
-                <select id="sign-type" onchange="updateProfileInfo(this)"><option value="" disabled selected>SELECIONAR</option><option value="pessoal">PESSOAL (PRIVADO)</option><option value="comunidade">COMUNIDADE (PÚBLICO)</option></select>
-                <div id="profile-info" class="text-[9px] font-bold text-amber-600 uppercase mt-2 italic px-2 min-h-[30px]"></div>
+            <div id="signup-form" class="hidden">
+                <input type="text" id="sign-nick" placeholder="NICKNAME">
+                <input type="email" id="sign-email" placeholder="E-MAIL">
+                <input type="password" id="sign-pass" placeholder="SENHA">
+                <select id="sign-type"><option value="pessoal">PERFIL PESSOAL (PRIVADO)</option><option value="comunidade" selected>PERFIL COMUNIDADE (PÚBLICO)</option></select>
                 <button class="btn-gold w-full mt-6" onclick="handleSignup()">Criar Conta</button>
-                <button class="text-[10px] w-full text-center mt-6 font-black uppercase text-zinc-500 underline" onclick="toggleAuth(true)">Já tenho conta</button>
+                <button class="text-[10px] mt-6 uppercase text-zinc-500" onclick="toggleAuth(true)">Já tenho conta</button>
             </div>
         </div>
     </div>
 
-    <!-- APP PRINCIPAL -->
     <div id="main-app" class="hidden">
         <div class="flex justify-between items-center mb-5 sticky top-0 bg-black z-50 py-2">
-            <div><h1 class="text-2xl font-black text-amber-500 italic uppercase leading-none">COFFEE MASTER</h1><span id="user-display" class="text-[8px] font-black text-zinc-600 uppercase italic"></span></div>
-            <div class="flex gap-2"><button onclick="openPix()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-amber-600 text-amber-500 italic uppercase">Pagar um café ☕</button><button onclick="handleLogout()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-zinc-700 text-zinc-500">Sair</button></div>
+            <div><h1 class="text-2xl font-black text-amber-500 italic uppercase">COFFEE MASTER</h1><span id="user-display" class="text-[8px] font-black text-zinc-600 uppercase"></span></div>
+            <button onclick="auth.signOut()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-zinc-700 text-zinc-500">Sair</button>
         </div>
         
-        <div id="tabs-container" class="flex mb-6 bg-black p-1 rounded-2xl sticky top-[55px] z-50 border border-zinc-800 shadow-2xl overflow-x-auto no-scrollbar">
+        <div id="tabs-container" class="flex mb-6 bg-black p-1 rounded-2xl sticky top-[55px] z-50 border border-zinc-800">
             <button id="btn-cafes" class="tab-btn active-tab" onclick="showTab('cafes')">GRÃOS</button>
             <button id="btn-receitas" class="tab-btn" onclick="showTab('receitas')">RECEITAS</button>
-            <button id="btn-preparo" class="tab-btn" onclick="showTab('preparo')">PREPARAR</button>
-            <button id="btn-diario" class="tab-btn" onclick="showTab('diario')">DIÁRIO</button>
-            <button id="btn-admin" class="tab-btn hidden" onclick="showTab('admin')">ADMIN</button>
         </div>
 
-        <!-- ABA GRÃOS -->
         <div id="tab-cafes">
             <div class="card p-4">
                 <span class="label-gold mt-0">Produtor</span><input type="text" id="g-prod">
                 <span class="label-gold">Grão</span><input type="text" id="g-nome">
                 <span class="label-gold">Variedade</span><input type="text" id="g-variedade">
-                <span class="label-gold">Processo</span><input type="text" id="g-processo">
-                <div class="flex gap-2">
-                    <div class="flex-1"><span class="label-gold">Altitude</span><input type="text" id="g-altitude"></div>
-                    <div class="flex-1"><span class="label-gold">Torrefação</span><input type="text" id="g-torrefacao"></div>
-                </div>
-                <div class="flex gap-2">
-                    <div class="flex-1"><span class="label-gold">Torra</span><select id="g-torra"><option value="" disabled selected>SELECIONAR</option><option>CLARA</option><option>MÉDIA-CLARA</option><option>MÉDIA</option><option>ESCURA</option></select></div>
-                    <div class="flex-1"><span class="label-gold">DATA DA TORRA</span><input type="date" id="g-data"></div>
-                </div>
-                <span class="label-gold">Notas Sensoriais</span><textarea id="g-notas" rows="2"></textarea>
                 <span class="label-gold">Foto</span><input type="file" id="g-photo-input" accept="image/*" class="text-[10px] bg-transparent border-dashed border-zinc-700 p-2">
-                <div id="g-edit-actions" class="hidden flex gap-2 mt-4"><button class="btn-gold flex-1 mt-0" onclick="saveG()">Atualizar</button><button class="bg-zinc-800 text-zinc-400 font-black py-4 px-4 rounded-xl flex-[0.3]" onclick="cancelEdit('g')">X</button></div>
-                <button class="btn-gold w-full" onclick="saveG()" id="g-btn-main">Salvar</button>
+                <div id="g-edit-actions" class="hidden flex gap-2 mt-4"><button class="btn-gold flex-1 mt-0" onclick="saveG()">Atualizar</button><button class="bg-zinc-800 text-zinc-400 font-black py-4 px-4 rounded-xl" onclick="cancelEdit()">X</button></div>
+                <button class="btn-gold w-full" onclick="saveG()" id="g-btn-main">Salvar Grão</button>
             </div>
-            <input type="text" id="search-g" class="search-input w-full" placeholder="FILTRAR GRÃOS...">
             <div id="list-g" class="space-y-3"></div>
         </div>
 
-        <!-- ABA RECEITAS -->
-        <div id="tab-receitas" class="hidden">
-            <div class="card p-4">
-                <span class="label-gold mt-0">Nome da Receita</span><input type="text" id="r-nome">
-                <span class="label-gold">Método</span><select id="r-metodo" onchange="checkMetodo(this)"><option value="" disabled selected>SELECIONAR</option><option>V60</option><option>AEROPRESS</option><option>KOAR</option><option value="OUTROS">OUTROS...</option></select>
-                <div id="r-metodo-outro-div" class="hidden mt-2"><input type="text" id="r-metodo-outro"></div>
-                <div class="bg-zinc-900 p-3 rounded-xl border border-dashed border-zinc-700 mt-4 space-y-4">
-                    <div class="grid grid-cols-3 gap-2">
-                        <div><span class="label-gold mt-0">Ratio</span><input type="number" id="r-ratio-base" step="0.1" oninput="calcTotalR()"></div>
-                        <div><span class="label-gold mt-0">Pó (g)</span><input type="number" id="r-po-base" oninput="calcTotalR()"></div>
-                        <div><span class="label-gold mt-0">Total</span><input type="number" id="r-total-base" readonly class="text-amber-500 font-bold bg-transparent border-none"></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div><span class="label-gold mt-0">Clicks</span><input type="number" id="r-clicks-base"></div>
-                        <div><span class="label-gold mt-0">Temp</span><input type="number" id="r-temp-base"></div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mt-4">
-                    <div><span class="label-gold">Bloom (ml)</span><input type="number" id="r-bloom-ml"></div>
-                    <div><span class="label-gold">Tempo (s)</span><input type="number" id="r-bloom-sec"></div>
-                </div>
-                <div id="ataques-container" class="mt-2 space-y-2"></div>
-                <button onclick="addAtackField()" class="text-[9px] font-black text-amber-500 mt-2 p-3 border border-dashed border-amber-900 w-full rounded-lg uppercase">+ ADD ATAQUE</button>
-                <div id="r-edit-actions" class="hidden flex gap-2 mt-5"><button class="btn-gold flex-1 mt-0" onclick="saveR()">Atualizar Receita</button><button class="bg-zinc-800 text-zinc-400 font-black py-4 px-4 rounded-xl flex-[0.3]" onclick="cancelEdit('r')">X</button></div>
-                <button class="btn-gold w-full mt-5" onclick="saveR()" id="r-btn-main">Salvar Receita</button>
-            </div>
-            <input type="text" id="search-r" class="search-input w-full" placeholder="FILTRAR RECEITAS...">
-            <div id="list-r" class="space-y-3"></div>
-        </div>
-
-        <!-- ABA PREPARO -->
-        <div id="tab-preparo" class="hidden">
-            <div class="card border-amber-600 bg-black p-5">
-                <select id="p-g" onchange="upCalc()"></select><select id="p-r" onchange="handleRecipeSelect()"></select>
-                <div class="grid grid-cols-4 gap-1 mt-4 text-center">
-                    <div><span class="label-gold mt-0 text-[8px]">Pó(g)</span><input type="text" id="p-po-val" value="--" onfocus="handleFocus(this)" oninput="upCalc()" class="text-center text-sm text-amber-500 font-black bg-transparent border-none"></div>
-                    <div><span class="label-gold mt-0 text-[8px]">Ratio</span><input type="text" id="p-ratio-val" value="--" onfocus="handleFocus(this)" oninput="upCalc()" class="text-center text-sm text-white font-black bg-transparent border-none"></div>
-                    <div><span class="label-gold mt-0 text-[8px]">Clicks</span><input type="text" id="p-clicks-val" value="--" onfocus="handleFocus(this)" class="text-center text-sm text-zinc-400 font-black bg-transparent border-none"></div>
-                    <div><span class="label-gold mt-0 text-[8px]">Temp</span><input type="text" id="p-temp-val" value="--" onfocus="handleFocus(this)" class="text-center text-sm text-zinc-400 font-black bg-transparent border-none"></div>
-                </div>
-                <div class="bg-zinc-900 rounded-2xl py-4 px-5 mt-6 border border-zinc-800 flex justify-between items-center shadow-inner">
-                    <span class="text-[10px] font-black text-zinc-500 uppercase italic">Água</span>
-                    <div class="text-4xl font-black text-white italic"><span id="p-total">0</span>ml</div>
-                </div>
-                <div id="p-steps" class="flex gap-3 mt-6 overflow-x-auto pb-4 scroll-smooth no-scrollbar flex-nowrap"></div>
-                <div id="timer" class="text-6xl font-black my-6 text-center italic">00:00</div>
-                <button id="btn-timer-main" onclick="toggleTimer()" class="bg-green-700 text-white font-black py-4 rounded-xl w-full uppercase">Iniciar</button>
-                <button onclick="abrirFeedback()" class="bg-amber-600 text-black font-black py-4 rounded-xl w-full mt-3 text-sm uppercase italic">Finalizar</button>
-            </div>
-        </div>
-
-        <div id="tab-diario" class="hidden"><div id="list-logs" class="space-y-3"></div></div>
+        <div id="tab-receitas" class="hidden text-center p-10 text-zinc-600 font-black italic uppercase">Em breve...</div>
     </div>
 
     <script>
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('SW OK'))
-            .catch(err => console.log('SW ERR'));
-        }
-
         const config = { apiKey: "AIzaSyCbIsrGjuu6KN-A0xpZUC6ID9aOHBEIJSE", authDomain: "coffee-master-e1f5c.firebaseapp.com", projectId: "coffee-master-e1f5c", storageBucket: "coffee-master-e1f5c.firebasestorage.app", messagingSenderId: "171441357303", appId: "1:171441357303:web:c85dc841ee73f6f29e2ef2" };
         firebase.initializeApp(config); const db = firebase.firestore(); const auth = firebase.auth();
-        let currentUser = null, userProfile = null, timer = null, seg = 0, editIds = { g: null, r: null }, localData = { g: [], r: [], logs: [] }, activeStepsData = { steps: [], times: [] }, notaSelecionada = 0;
-        const DEFAULT_IMG = "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=150&h=150&fit=crop&q=80";
-        const ADMIN_EMAIL = "alanpocos@gmail.com";
+        let currentUser = null, userProfile = null, localData = { g: [] }, editId = null;
+        const ADMIN_EMAIL = 'alanpocos@gmail.com';
 
         auth.onAuthStateChanged(async (user) => {
             if (user) {
@@ -181,115 +102,115 @@
         });
 
         function showTab(t){ 
-            if(t !== 'preparo') { clearInterval(timer); timer = null; seg = 0; document.getElementById('timer').innerText = "00:00"; document.getElementById('btn-timer-main').innerText = "INICIAR"; }
-            ['cafes','receitas','preparo','diario'].forEach(i=>{ const el = document.getElementById('tab-'+i); if(el) el.classList.toggle('hidden', i!==t); const btn = document.getElementById('btn-'+i); if(btn) btn.classList.toggle('active-tab', i===t); }); 
-            if(t==='cafes') loadG(); if(t==='receitas') loadR(); if(t==='preparo') loadPrep(); if(t==='diario') loadDiario();
+            ['cafes','receitas'].forEach(i=>{ document.getElementById('tab-'+i).classList.toggle('hidden', i!==t); document.getElementById('btn-'+i).classList.toggle('active-tab', i===t); }); 
+            if(t==='cafes') loadG();
         }
 
         async function loadG() { 
-            let snap = (userProfile.type === 'pessoal' && currentUser.email !== ADMIN_EMAIL) ? await db.collection('cafes').where('owner_uid', '==', currentUser.uid).get() : await db.collection('cafes').get();
-            localData.g = snap.docs.map(d => ({id: d.id, ...d.data()})); renderG(localData.g);
+            let results = [];
+            if (currentUser.email === ADMIN_EMAIL) {
+                const snap = await db.collection('cafes').get();
+                results = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            } else if (userProfile.type === 'pessoal') {
+                // Perfil PESSOAL: Busca APENAS os grãos do dono
+                const snapOwn = await db.collection('cafes').where('owner_uid', '==', currentUser.uid).get();
+                results = snapOwn.docs.map(d => ({id: d.id, ...d.data()}));
+            } else {
+                // Perfil COMUNIDADE: Busca Públicos + Próprios
+                const snapPub = await db.collection('cafes').where('visibilidade', '==', 'publico').get();
+                const snapOwn = await db.collection('cafes').where('owner_uid', '==', currentUser.uid).get();
+                const map = new Map();
+                snapPub.forEach(d => map.set(d.id, {id: d.id, ...d.data()}));
+                snapOwn.forEach(d => map.set(d.id, {id: d.id, ...d.data()}));
+                results = Array.from(map.values());
+            }
+            localData.g = results;
+            renderG(results);
         }
 
         function renderG(data) {
             let h = ''; data.forEach(i => {
                 const isOwner = i.owner_uid === currentUser.uid;
-                h += `<div class="card p-3 flex gap-3 items-center border border-zinc-800 h-[115px]"><div class="flex-1 min-w-0 cursor-pointer" onclick="abrirDetalhesG('${i.id}')"><div class="text-[8px] text-zinc-600 font-black uppercase truncate">${i.prod || '--'} • @${i.owner_nick || 'Mestre'}</div><div class="text-base font-black italic uppercase text-white mt-1 leading-tight line-clamp-2">${i.nome}</div><div class="text-[8px] text-amber-600 font-bold uppercase mt-1 truncate">${i.variedade || '--'} | ${i.processo || '--'}</div></div><img src="${i.photo || DEFAULT_IMG}" class="grain-thumb"><div class="flex flex-col gap-1"> ${isOwner ? `<button onclick="editG('${i.id}')" class="p-2 bg-zinc-900 rounded-lg text-xs">✏️</button><button onclick="del('cafes','${i.id}','${i.nome}')" class="p-2 bg-zinc-900 rounded-lg text-xs">🗑️</button>` : ''} </div></div>`;
+                const isAdmin = currentUser.email === ADMIN_EMAIL;
+                h += `<div class="card p-3 flex gap-3 items-center border border-zinc-800"><div class="flex-1 min-w-0 cursor-pointer" onclick="abrirDetalhesG('${i.id}')"><div class="text-[8px] text-zinc-600 font-black uppercase truncate">${i.prod || '--'} • @${i.owner_nick || 'Mestre'}</div><div class="text-base font-black italic uppercase text-white truncate">${i.nome}</div></div><img src="${i.photo || 'https://via.placeholder.com/150'}" class="grain-thumb">${isOwner || isAdmin ? `<button onclick="editG('${i.id}')" class="p-2 bg-zinc-900 rounded-lg text-xs">✏️</button>` : ''}</div>`;
             }); document.getElementById('list-g').innerHTML = h;
         }
 
-        async function loadR() {
-            let snap = (userProfile.type === 'pessoal' && currentUser.email !== ADMIN_EMAIL) ? await db.collection('receitas').where('owner_uid', '==', currentUser.uid).get() : await db.collection('receitas').get();
-            localData.r = snap.docs.map(d => ({id: d.id, ...d.data()})); renderR(localData.r);
-        }
-
-        function renderR(data) {
-            let h = ''; data.forEach(i => {
-                const isOwner = i.owner_uid === currentUser.uid;
-                h += `<div class="card p-3 flex justify-between items-center h-[85px]"><div class="flex-1 min-w-0 cursor-pointer" onclick="abrirDetalhesR('${i.id}')"><div class="text-lg font-black italic uppercase text-amber-500 truncate">${i.nome}</div><div class="text-[8px] text-zinc-600 font-black uppercase mt-1">por @${i.owner_nick || 'Mestre'} | ${i.metodo}</div></div><div class="flex gap-2"> ${isOwner ? `<button onclick="editR('${i.id}')" class="p-2 bg-zinc-900 rounded-lg text-xs">✏️</button><button onclick="del('receitas','${i.id}','${i.nome}')" class="p-2 bg-zinc-900 rounded-lg text-xs">🗑️</button>` : ''} <button onclick="showTab('preparo'); handleRecipeSelect('${i.id}')" class="text-xs font-black p-2 bg-amber-600 text-black rounded-lg italic uppercase">Preparar</button> </div></div>`;
-            }); document.getElementById('list-r').innerHTML = h;
-        }
-
-        async function loadPrep() { 
-            const gc = await db.collection('cafes').get(), rc = await db.collection('receitas').get(); 
-            localData.g = gc.docs.map(d => ({id: d.id, ...d.data()})); localData.r = rc.docs.map(d => ({id: d.id, ...d.data()}));
-            let gh = '<option value="0">SELECIONE O GRÃO</option>', rh = '<option value="0">SELECIONE A RECEITA</option>'; 
-            gc.forEach(d => { if(d.data().owner_uid === currentUser.uid || d.data().visibilidade === 'publico') gh += `<option value="${d.id}">${d.data().nome}</option>`; }); 
-            rc.forEach(d => { if(d.data().owner_uid === currentUser.uid || d.data().visibilidade === 'publico') rh += `<option value="${d.id}">${d.data().nome}</option>`; }); 
-            document.getElementById('p-g').innerHTML = gh; document.getElementById('p-r').innerHTML = rh; 
-        }
-
-        function calcTotalR() {
-            const r = parseFloat(document.getElementById('r-ratio-base').value) || 0;
-            const p = parseFloat(document.getElementById('r-po-base').value) || 0;
-            const t = document.getElementById('r-total-base');
-            if(t) t.value = Math.round(r * p);
-        }
-
-        function handleRecipeSelect(rid) { 
-            if(rid) document.getElementById('p-r').value = rid;
-            const i = localData.r.find(x => x.id === document.getElementById('p-r').value);
+        function editG(id) {
+            const i = localData.g.find(x => x.id === id);
             if(!i) return;
-            document.getElementById('p-ratio-val').value = i.origRatio; document.getElementById('p-po-val').value = i.origPo; 
-            document.getElementById('p-clicks-val').value = i.origClicks || "--"; document.getElementById('p-temp-val').value = i.origTemp || "--";
-            upCalc(); 
+            editId = id;
+            document.getElementById('g-prod').value = i.prod;
+            document.getElementById('g-nome').value = i.nome;
+            document.getElementById('g-variedade').value = i.variedade;
+            document.getElementById('g-edit-actions').classList.remove('hidden');
+            document.getElementById('g-btn-main').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function upCalc() {
-            const r = parseFloat(document.getElementById('p-ratio-val').value)||0, p = parseFloat(document.getElementById('p-po-val').value)||0, total = Math.round(r * p);
-            document.getElementById('p-total').innerText = total;
-            const i = localData.r.find(x => x.id === document.getElementById('p-r').value);
-            if(!i) return;
-            activeStepsData = { steps: [], times: [] };
-            const bN = Math.round(total * (i.bloomMl / i.origTotal)); if(bN > 0) { activeStepsData.steps.push({ type: 'BLOOM', ml: bN, sec: i.bloomSec, cum: bN }); activeStepsData.times.push(i.bloomSec); }
-            let c = bN; (i.ataques || []).forEach((a, idx) => { const aN = Math.round(total * (a.ml / i.origTotal)); if(aN > 0){ c += aN; activeStepsData.steps.push({ type: `ATK ${idx+1}`, ml: aN, sec: a.sec, cum: c }); activeStepsData.times.push((activeStepsData.times.length > 0 ? activeStepsData.times[activeStepsData.times.length-1] : 0) + a.sec); } });
-            renderSteps(0);
+        function cancelEdit() {
+            editId = null;
+            document.getElementById('g-edit-actions').classList.add('hidden');
+            document.getElementById('g-btn-main').classList.remove('hidden');
+            document.querySelectorAll('#tab-cafes input').forEach(el => el.value = "");
         }
 
-        function renderSteps(segA) {
-            let tIdx = 0; activeStepsData.times.forEach((t, i) => { if(segA >= t) tIdx = i + 1; });
-            let h = ''; activeStepsData.steps.forEach((s, idx) => { const act = idx === tIdx; h += `<div class="step-box ${act?'step-box-active':''}" id="p-step-${idx}"><div class="text-[9px] ${act?'text-amber-500':'text-zinc-600'} font-black uppercase">${s.type}</div><div class="text-xl font-black italic ${act?'text-white':'text-zinc-500'} mt-1">${s.ml}ml</div><div class="text-[10px] text-amber-600 font-bold uppercase mt-1">SOMA: ${s.cum}ml</div></div>`; });
-            document.getElementById('p-steps').innerHTML = h;
+        async function processImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const size = 600;
+                        canvas.width = size; canvas.height = size;
+                        const min = Math.min(img.width, img.height);
+                        canvas.getContext('2d').drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, size, size);
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function saveG() {
+            const file = document.getElementById('g-photo-input').files[0];
+            const originalItem = editId ? localData.g.find(x => x.id === editId) : null;
+            
+            const d = { 
+                prod: document.getElementById('g-prod').value.toUpperCase(), 
+                nome: document.getElementById('g-nome').value.toUpperCase(), 
+                variedade: document.getElementById('g-variedade').value.toUpperCase(),
+                owner_uid: originalItem ? (originalItem.owner_uid || currentUser.uid) : currentUser.uid, 
+                owner_nick: originalItem ? (originalItem.owner_nick || userProfile.nick) : userProfile.nick,
+                visibilidade: originalItem ? (originalItem.visibilidade || (userProfile.type === 'pessoal' ? 'privado' : 'publico')) : (userProfile.type === 'pessoal' ? 'privado' : 'publico'),
+                ts: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if(file) d.photo = await processImage(file);
+            if(editId) await db.collection('cafes').doc(editId).update(d);
+            else await db.collection('cafes').add(d);
+            
+            cancelEdit(); loadG();
         }
 
         function abrirDetalhesG(id) { 
             const i = localData.g.find(x => x.id === id); 
             if(!i) return; 
-            document.getElementById('detalhes-content').innerHTML = `<div><span class="label-gold">PRODUTOR</span><p class="text-white font-bold italic text-sm">${i.prod||'--'}</p></div><div><span class="label-gold">GRÃO</span><p class="text-white font-bold italic text-sm">${i.nome||'--'}</p></div><div><span class="label-gold">NOTAS</span><p class="text-zinc-400 italic text-sm">"${i.notas||'--'}"</p></div>`; 
+            document.getElementById('detalhes-content').innerHTML = `
+                <div class="flex justify-center mb-4"><img src="${i.photo || 'https://via.placeholder.com/150'}" class="w-40 h-40 rounded-2xl object-cover cursor-zoom-in" onclick="ampliarImagem('${i.photo || 'https://via.placeholder.com/150'}')"></div>
+                <div><span class="label-gold">PRODUTOR</span><p class="text-white font-bold italic text-sm">${i.prod||'--'}</p></div>
+                <div><span class="label-gold">GRÃO</span><p class="text-white font-bold italic text-sm">${i.nome||'--'}</p></div>
+                <div class="text-[8px] text-zinc-600 mt-4 uppercase">@${i.owner_nick} | ${i.visibilidade}</div>
+            `; 
             document.getElementById('modal-detalhes').classList.remove('hidden'); 
         }
 
-        function abrirDetalhesR(id) {
-            const i = localData.r.find(x => x.id === id);
-            if(!i) return;
-            try {
-                let atkH = '';
-                if (i.ataques) {
-                    atkH = i.ataques.map((a, idx) => `<p class="text-zinc-400 text-[10px] italic">Atk ${idx+1}: ${a.ml}ml em ${a.sec}s ${a.obs ? `(${a.obs})` : ''}</p>`).join('');
-                }
-                document.getElementById('detalhes-content').innerHTML = `
-                    <div><span class="label-gold">RECEITA</span><p class="text-white font-bold italic text-sm">${i.nome}</p></div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div><span class="label-gold">RATIO</span><p class="text-white font-bold italic text-sm">1:${i.origRatio||'--'}</p></div>
-                        <div><span class="label-gold">PÓ</span><p class="text-white font-bold italic text-sm">${i.origPo||'--'}g</p></div>
-                        <div><span class="label-gold">TOTAL</span><p class="text-amber-500 font-bold italic text-sm">${i.origTotal||'--'}ml</p></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div><span class="label-gold">CLICKS</span><p class="text-white font-bold italic text-sm">${i.origClicks || '--'}</p></div>
-                        <div><span class="label-gold">TEMP</span><p class="text-white font-bold italic text-sm">${i.origTemp || '--'}°C</p></div>
-                    </div>
-                    <div><span class="label-gold">BLOOM</span><p class="text-white font-bold italic text-sm">${i.bloomMl || 0}ml em ${i.bloomSec || 0}s</p></div>
-                    ${atkH ? `<div><span class="label-gold">ATAQUES</span><div class="space-y-1 mt-1">${atkH}</div></div>` : ''}
-                `;
-                document.getElementById('modal-detalhes').classList.remove('hidden');
-            } catch (e) { console.log(e); }
-        }
-
+        function ampliarImagem(src) { document.getElementById('img-ampliada').src = src; document.getElementById('modal-zoom').classList.remove('hidden'); }
         function fecharDetalhes() { document.getElementById('modal-detalhes').classList.add('hidden'); }
         async function handleLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-pass').value); } catch(e) { alert(e.message); } }
         async function handleSignup() { try { const res = await auth.createUserWithEmailAndPassword(document.getElementById('sign-email').value, document.getElementById('sign-pass').value); await db.collection('users').doc(res.user.uid).set({ nick: document.getElementById('sign-nick').value, type: document.getElementById('sign-type').value, email: document.getElementById('sign-email').value, uid: res.user.uid }); } catch(e) { alert(e.message); } }
-        function toggleTimer() { if(timer) { clearInterval(timer); timer = null; } else { timer = setInterval(() => { seg++; document.getElementById('timer').innerText = `${Math.floor(seg/60).toString().padStart(2,'0')}:${(seg%60).toString().padStart(2,'0')}`; renderSteps(seg); }, 1000); } }
-        function handleLogout() { auth.signOut(); }
         function toggleAuth(l) { document.getElementById('login-form').classList.toggle('hidden', !l); document.getElementById('signup-form').classList.toggle('hidden', l); }
     </script>
 </body>
