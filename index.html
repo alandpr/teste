@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.19</title>
+    <title>Coffee Master v10.20</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,6 +32,7 @@
         .search-input { background: #000; border: 1px solid #333; font-size: 11px; padding: 10px; border-radius: 10px; text-transform: uppercase; margin-bottom: 15px; }
         .grain-thumb { width: 75px; height: 75px; border-radius: 16px; object-fit: cover; background: #222; border: 1px solid #333; flex-shrink: 0; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .atk-row { background: #111; padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #222; }
     </style>
 </head>
 <body class="p-3 max-w-lg mx-auto">
@@ -111,11 +112,22 @@
         <div id="tab-receitas" class="hidden">
             <div class="card p-4">
                 <span class="label-gold mt-0">Nome da Receita</span><input type="text" id="r-nome">
-                <div class="grid grid-cols-3 gap-2">
+                <span class="label-gold">Método</span><select id="r-metodo"><option value="" disabled selected>SELECIONAR</option><option>V60</option><option>AEROPRESS</option><option>KOAR</option><option>PRENSA FRANCESA</option><option>MOKA</option><option>OUTROS</option></select>
+                <div class="grid grid-cols-3 gap-2 border-t border-zinc-800 mt-4 pt-2">
                     <div><span class="label-gold">Ratio</span><input type="number" id="r-ratio" step="0.1" oninput="calcTotalR()"></div>
                     <div><span class="label-gold">Pó (g)</span><input type="number" id="r-po" oninput="calcTotalR()"></div>
                     <div><span class="label-gold">Total</span><input type="number" id="r-total" readonly class="text-amber-500 font-bold bg-transparent border-none"></div>
                 </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><span class="label-gold">Clicks</span><input type="number" id="r-clicks"></div>
+                    <div><span class="label-gold">Temp</span><input type="number" id="r-temp"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 border-t border-zinc-800 mt-4 pt-2">
+                    <div><span class="label-gold">Bloom (ml)</span><input type="number" id="r-bloom-ml"></div>
+                    <div><span class="label-gold">Tempo (s)</span><input type="number" id="r-bloom-sec"></div>
+                </div>
+                <div id="ataques-container" class="mt-2"></div>
+                <button onclick="addAtackField()" class="text-[9px] font-black text-amber-500 mt-2 p-3 border border-dashed border-amber-900 w-full rounded-lg uppercase">+ ADD ATAQUE</button>
                 <div id="r-edit-actions" class="hidden flex gap-2 mt-4"><button class="btn-gold flex-1 mt-0" onclick="saveR()">Atualizar</button><button class="bg-zinc-800 text-zinc-400 font-black py-4 px-4 rounded-xl flex-[0.3]" onclick="cancelEdit('r')">X</button></div>
                 <button class="btn-gold w-full mt-4" onclick="saveR()" id="r-btn-main">Salvar Receita</button>
             </div>
@@ -127,6 +139,12 @@
         <div id="tab-preparo" class="hidden">
             <div class="card border-amber-600 bg-black p-5">
                 <select id="p-g" onchange="upCalc()"></select><select id="p-r" onchange="handleRecipeSelect()"></select>
+                <div class="grid grid-cols-4 gap-1 mt-4 text-center">
+                    <div><span class="label-gold mt-0 text-[8px]">Pó(g)</span><div id="p-po-val" class="text-amber-500 font-black">--</div></div>
+                    <div><span class="label-gold mt-0 text-[8px]">Ratio</span><div id="p-ratio-val" class="text-white font-black">--</div></div>
+                    <div><span class="label-gold mt-0 text-[8px]">Clicks</span><div id="p-clicks-val" class="text-zinc-500 font-black">--</div></div>
+                    <div><span class="label-gold mt-0 text-[8px]">Temp</span><div id="p-temp-val" class="text-zinc-500 font-black">--</div></div>
+                </div>
                 <div class="bg-zinc-900 rounded-2xl py-4 px-5 mt-6 border border-zinc-800 flex justify-between items-center">
                     <span class="text-[10px] font-black text-zinc-500 uppercase italic">Água</span>
                     <div class="text-4xl font-black text-white italic"><span id="p-total-val">0</span>ml</div>
@@ -154,6 +172,7 @@
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('user-display').innerText = `@${userProfile.nick} (${userProfile.type})`;
+                if(user.email === ADMIN_EMAIL) document.getElementById('btn-admin').classList.remove('hidden');
                 showTab('cafes');
             } else { document.getElementById('auth-screen').classList.remove('hidden'); document.getElementById('main-app').classList.add('hidden'); }
         });
@@ -175,9 +194,7 @@
             } else {
                 const snapPub = await db.collection('cafes').where('visibilidade', '==', 'publico').get();
                 const snapOwn = await db.collection('cafes').where('owner_uid', '==', currentUser.uid).get();
-                const map = new Map();
-                snapPub.forEach(d => map.set(d.id, {id: d.id, ...d.data()}));
-                snapOwn.forEach(d => map.set(d.id, {id: d.id, ...d.data()}));
+                const map = new Map(); snapPub.forEach(d => map.set(d.id, {id: d.id, ...d.data()})); snapOwn.forEach(d => map.set(d.id, {id: d.id, ...d.data()}));
                 results = Array.from(map.values());
             }
             localData.g = results; renderG(results);
@@ -211,7 +228,7 @@
         function renderR(data) {
             let h = ''; data.forEach(i => {
                 const isOwner = i.owner_uid === currentUser.uid || currentUser.email === ADMIN_EMAIL;
-                h += `<div class="card p-3 flex justify-between items-center h-[85px]"><div class="flex-1 min-w-0 cursor-pointer" onclick="abrirDetalhesR('${i.id}')"><div class="text-lg font-black italic uppercase text-amber-500 truncate">${i.nome}</div><div class="text-[8px] text-zinc-600 font-black uppercase mt-1">por @${i.owner_nick || 'Mestre'}</div></div><div class="flex gap-2"> ${isOwner ? `<button onclick="editR('${i.id}')" class="p-2 bg-zinc-900 rounded-lg text-xs">✏️</button><button onclick="del('receitas','${i.id}','${i.nome}')" class="p-2 bg-zinc-900 rounded-lg text-xs">🗑️</button>` : ''} <button onclick="showTab('preparo'); handleRecipeSelect('${i.id}')" class="text-xs font-black p-3 bg-amber-600 text-black rounded-lg italic uppercase">Preparar</button> </div></div>`;
+                h += `<div class="card p-3 flex justify-between items-center h-[85px]"><div class="flex-1 min-w-0 cursor-pointer" onclick="abrirDetalhesR('${i.id}')"><div class="text-lg font-black italic uppercase text-amber-500 truncate">${i.nome}</div><div class="text-[8px] text-zinc-600 font-black uppercase mt-1">por @${i.owner_nick || 'Mestre'} | ${i.metodo || '--'}</div></div><div class="flex gap-2"> ${isOwner ? `<button onclick="editR('${i.id}')" class="p-2 bg-zinc-900 rounded-lg text-xs">✏️</button><button onclick="del('receitas','${i.id}','${i.nome}')" class="p-2 bg-zinc-900 rounded-lg text-xs">🗑️</button>` : ''} <button onclick="showTab('preparo'); handleRecipeSelect('${i.id}')" class="text-xs font-black p-3 bg-amber-600 text-black rounded-lg italic uppercase">Preparar</button> </div></div>`;
             }); document.getElementById('list-r').innerHTML = h;
         }
 
@@ -225,12 +242,13 @@
         function handleRecipeSelect(rid) { 
             if(rid) document.getElementById('p-r').value = rid;
             const i = localData.r.find(x => x.id === document.getElementById('p-r').value);
-            if(i) document.getElementById('p-total-val').innerText = i.origTotal;
-        }
-
-        function upCalc() {
-            const i = localData.r.find(x => x.id === document.getElementById('p-r').value);
-            if(i) document.getElementById('p-total-val').innerText = i.origTotal;
+            if(i) {
+                document.getElementById('p-total-val').innerText = i.origTotal;
+                document.getElementById('p-po-val').innerText = i.origPo + 'g';
+                document.getElementById('p-ratio-val').innerText = '1:' + i.origRatio;
+                document.getElementById('p-clicks-val').innerText = i.origClicks || '--';
+                document.getElementById('p-temp-val').innerText = (i.origTemp || '--') + '°';
+            }
         }
 
         async function loadDiario() { 
@@ -243,18 +261,18 @@
 
         async function processImage(file) {
             return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
+                const reader = new FileReader(); reader.onload = (e) => {
+                    const img = new Image(); img.onload = () => {
                         const canvas = document.createElement('canvas'); const size = 600; canvas.width = size; canvas.height = size;
                         const min = Math.min(img.width, img.height); canvas.getContext('2d').drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, size, size);
                         resolve(canvas.toDataURL('image/jpeg', 0.8));
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
+                    }; img.src = e.target.result;
+                }; reader.readAsDataURL(file);
             });
+        }
+
+        function addAtackField(ml='', sec='', obs='') {
+            document.getElementById('ataques-container').insertAdjacentHTML('beforeend', `<div class="atk-row"><div class="flex gap-2"><div><span class="label-gold mt-0">ML</span><input type="number" class="atk-ml" value="${ml}"></div><div><span class="label-gold mt-0">SEG</span><input type="number" class="atk-sec" value="${sec}"></div><button onclick="this.parentElement.parentElement.remove()" class="text-zinc-600 font-black pt-5 px-2">X</button></div><span class="label-gold mt-1">Obs</span><input type="text" class="atk-obs" value="${obs}"></div>`);
         }
 
         async function saveG() {
@@ -264,14 +282,15 @@
         }
 
         async function saveR() {
+            const atks = []; document.querySelectorAll('.atk-row').forEach(row => { atks.push({ ml: parseFloat(row.querySelector('.atk-ml').value)||0, sec: parseFloat(row.querySelector('.atk-sec').value)||0, obs: row.querySelector('.atk-obs').value.toUpperCase() }); });
             const original = editIds.r ? localData.r.find(x => x.id === editIds.r) : null;
-            const d = { nome: document.getElementById('r-nome').value.toUpperCase(), origRatio: parseFloat(document.getElementById('r-ratio')), origPo: parseFloat(document.getElementById('r-po')), origTotal: parseInt(document.getElementById('r-total').value), owner_uid: original ? original.owner_uid : currentUser.uid, owner_nick: original ? original.owner_nick : userProfile.nick, visibilidade: original ? original.visibilidade : (userProfile.type === 'pessoal' ? 'privado' : 'publico'), ts: firebase.firestore.FieldValue.serverTimestamp() };
+            const d = { nome: document.getElementById('r-nome').value.toUpperCase(), metodo: document.getElementById('r-metodo').value, origRatio: parseFloat(document.getElementById('r-ratio')), origPo: parseFloat(document.getElementById('r-po')), origTotal: parseInt(document.getElementById('r-total').value), origClicks: document.getElementById('r-clicks').value, origTemp: document.getElementById('r-temp').value, bloomMl: parseFloat(document.getElementById('r-bloom-ml').value)||0, bloomSec: parseFloat(document.getElementById('r-bloom-sec').value)||0, ataques: atks, owner_uid: original ? original.owner_uid : currentUser.uid, owner_nick: original ? original.owner_nick : userProfile.nick, visibilidade: original ? original.visibilidade : (userProfile.type === 'pessoal' ? 'privado' : 'publico'), ts: firebase.firestore.FieldValue.serverTimestamp() };
             if(editIds.r) await db.collection('receitas').doc(editIds.r).update(d); else await db.collection('receitas').add(d); cancelEdit('r'); loadR();
         }
 
         function editG(id) { const i = localData.g.find(x => x.id === id); if(!i) return; editIds.g = id; document.getElementById('g-prod').value = i.prod; document.getElementById('g-nome').value = i.nome; document.getElementById('g-variedade').value = i.variedade; document.getElementById('g-processo').value = i.processo || ''; document.getElementById('g-torrefacao').value = i.torrefacao || ''; document.getElementById('g-torra').value = i.torra || ''; document.getElementById('g-altitude').value = i.altitude || ''; document.getElementById('g-data').value = i.data || ''; document.getElementById('g-notas').value = i.notas || ''; document.getElementById('g-edit-actions').classList.remove('hidden'); document.getElementById('g-btn-main').classList.add('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
-        function editR(id) { const i = localData.r.find(x => x.id === id); if(!i) return; editIds.r = id; document.getElementById('r-nome').value = i.nome; document.getElementById('r-ratio').value = i.origRatio; document.getElementById('r-po').value = i.origPo; document.getElementById('r-total').value = i.origTotal; document.getElementById('r-edit-actions').classList.remove('hidden'); document.getElementById('r-btn-main').classList.add('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
-        function cancelEdit(t) { editIds[t] = null; document.getElementById(t+'-edit-actions').classList.add('hidden'); document.getElementById(t+'-btn-main').classList.remove('hidden'); document.querySelectorAll('#tab-'+(t==='g'?'cafes':'receitas')+' input, select, textarea').forEach(el => el.value = ""); }
+        function editR(id) { const i = localData.r.find(x => x.id === id); if(!i) return; editIds.r = id; document.getElementById('r-nome').value = i.nome; document.getElementById('r-metodo').value = i.metodo || ''; document.getElementById('r-ratio').value = i.origRatio; document.getElementById('r-po').value = i.origPo; document.getElementById('r-total').value = i.origTotal; document.getElementById('r-clicks').value = i.origClicks || ''; document.getElementById('r-temp').value = i.origTemp || ''; document.getElementById('r-bloom-ml').value = i.bloomMl || ''; document.getElementById('r-bloom-sec').value = i.bloomSec || ''; document.getElementById('ataques-container').innerHTML = ''; (i.ataques || []).forEach(a => addAtackField(a.ml, a.sec, a.obs)); document.getElementById('r-edit-actions').classList.remove('hidden'); document.getElementById('r-btn-main').classList.add('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
+        function cancelEdit(t) { editIds[t] = null; document.getElementById(t+'-edit-actions').classList.add('hidden'); document.getElementById(t+'-btn-main').classList.remove('hidden'); document.querySelectorAll('#tab-'+(t==='g'?'cafes':'receitas')+' input, select, textarea').forEach(el => el.value = ""); document.getElementById('ataques-container').innerHTML = ''; }
         async function del(c, id, n) { if(confirm(`Excluir ${n}?`)) { await db.collection(c).doc(id).delete(); loadG(); loadR(); loadDiario(); } }
         function calcTotalR() { const r = parseFloat(document.getElementById('r-ratio').value)||0, p = parseFloat(document.getElementById('r-po').value)||0; document.getElementById('r-total').value = Math.round(r*p); }
 
@@ -283,18 +302,16 @@
                 <div><span class="label-gold">PRODUTOR</span><p class="text-white font-bold italic text-sm">${i.prod||'--'}</p></div>
                 <div><span class="label-gold">IDENTIFICAÇÃO</span><p class="text-white font-bold italic text-sm">${i.nome||'--'}</p></div>
                 <div><span class="label-gold">TORREFAÇÃO</span><p class="text-amber-500 font-bold italic text-sm">${i.torrefacao||'--'}</p></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><span class="label-gold">VARIEDADE</span><p class="text-white font-bold italic text-sm">${i.variedade||'--'}</p></div>
-                    <div><span class="label-gold">PROCESSO</span><p class="text-white font-bold italic text-sm">${i.processo||'--'}</p></div>
-                </div>
-                <div><span class="label-gold">ALTITUDE | TORRA</span><p class="text-white font-bold italic text-sm">${i.altitude||'--'} | ${i.torra||'--'}</p></div>
+                <div class="grid grid-cols-2 gap-2"><div><span class="label-gold">VARIEDADE</span><p class="text-white font-bold italic text-sm">${i.variedade||'--'}</p></div><div><span class="label-gold">PROCESSO</span><p class="text-white font-bold italic text-sm">${i.processo||'--'}</p></div></div>
+                <div><span class="label-gold">ALTITUDE | TORRA</span><p class="text-white font-bold italic text-sm"><span class="text-white">${i.altitude||'--'}</span> | <span class="text-white">${i.torra||'--'}</span></p></div>
                 <div><span class="label-gold">NOTAS</span><p class="text-zinc-400 italic text-sm">"${i.notas||'--'}"</p></div>
             `; document.getElementById('modal-detalhes').classList.remove('hidden'); 
         }
 
         function abrirDetalhesR(id) {
             const i = localData.r.find(x => x.id === id); if(!i) return;
-            document.getElementById('detalhes-content').innerHTML = `<div><span class="label-gold">RECEITA</span><p class="text-white font-bold italic text-sm">${i.nome}</p></div><div class="grid grid-cols-3 gap-2"><div><span class="label-gold">RATIO</span><p class="text-white font-bold text-sm">1:${i.origRatio}</p></div><div><span class="label-gold">PÓ</span><p class="text-white font-bold text-sm">${i.origPo}g</p></div><div><span class="label-gold">TOTAL</span><p class="text-amber-500 font-bold text-sm">${i.origTotal}ml</p></div></div>`;
+            let atkH = (i.ataques || []).map((a, idx) => `<p class="text-zinc-500 text-[10px]">Atk ${idx+1}: ${a.ml}ml em ${a.sec}s</p>`).join('');
+            document.getElementById('detalhes-content').innerHTML = `<div><span class="label-gold">RECEITA</span><p class="text-white font-bold italic text-sm">${i.nome}</p></div><div class="grid grid-cols-3 gap-2"><div><span class="label-gold">RATIO</span><p class="text-white text-sm">1:${i.origRatio}</p></div><div><span class="label-gold">PÓ</span><p class="text-white text-sm">${i.origPo}g</p></div><div><span class="label-gold">TOTAL</span><p class="text-amber-500 text-sm">${i.origTotal}ml</p></div></div><div class="grid grid-cols-2 gap-2"><div><span class="label-gold">CLICKS</span><p class="text-white text-sm">${i.origClicks||'--'}</p></div><div><span class="label-gold">TEMP</span><p class="text-white text-sm">${i.origTemp||'--'}°</p></div></div>${atkH ? `<div><span class="label-gold">ATAQUES</span>${atkH}</div>` : ''}`;
             document.getElementById('modal-detalhes').classList.remove('hidden');
         }
 
