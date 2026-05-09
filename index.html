@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.20</title>
+    <title>Coffee Master v10.21</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,8 +22,6 @@
         .btn-gold { background: #f59e0b; color: #000; font-weight: 900; padding: 18px; border-radius: 18px; width: 100%; text-transform: uppercase; font-size: 14px; margin-top: 15px; cursor: pointer; }
         .tab-btn { background: #111; color: #444; flex: 1; padding: 14px 5px; border-radius: 14px; font-size: 10px; font-weight: 900; margin: 3px; border: 1px solid #222; }
         .active-tab { background: #f59e0b; color: #000; border-color: #fbbf24; }
-        .step-box { background: #161616; padding: 12px; border-radius: 16px; text-align: center; border: 2px solid #262626; width: 145px; flex-shrink: 0; }
-        .step-box-active { border-color: #f59e0b !important; background: #221a05; }
         #auth-screen, #modal-feedback, #pix-modal, #modal-detalhes, #modal-zoom, #admin-user-details { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; z-index: 2000; padding: 20px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
         #modal-zoom { background: rgba(0,0,0,0.95); z-index: 3000; align-items: center; justify-content: center; padding: 0; }
         .hidden { display: none !important; }
@@ -33,6 +31,7 @@
         .grain-thumb { width: 75px; height: 75px; border-radius: 16px; object-fit: cover; background: #222; border: 1px solid #333; flex-shrink: 0; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .atk-row { background: #111; padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #222; }
+        .admin-tag { font-size: 7px; background: #222; color: #f59e0b; padding: 2px 4px; border-radius: 4px; margin-left: 4px; border: 0.5px solid #f59e0b; }
     </style>
 </head>
 <body class="p-3 max-w-lg mx-auto">
@@ -84,7 +83,6 @@
             <button id="btn-admin" class="tab-btn hidden" onclick="showTab('admin')">ADMIN</button>
         </div>
 
-        <!-- ABA GRÃOS -->
         <div id="tab-cafes">
             <div class="card p-4">
                 <span class="label-gold mt-0">Produtor</span><input type="text" id="g-prod">
@@ -108,7 +106,6 @@
             <div id="list-g" class="space-y-3"></div>
         </div>
 
-        <!-- ABA RECEITAS -->
         <div id="tab-receitas" class="hidden">
             <div class="card p-4">
                 <span class="label-gold mt-0">Nome da Receita</span><input type="text" id="r-nome">
@@ -135,19 +132,18 @@
             <div id="list-r" class="space-y-3"></div>
         </div>
 
-        <!-- ABA PREPARO -->
         <div id="tab-preparo" class="hidden">
             <div class="card border-amber-600 bg-black p-5">
                 <select id="p-g" onchange="upCalc()"></select><select id="p-r" onchange="handleRecipeSelect()"></select>
                 <div class="grid grid-cols-4 gap-1 mt-4 text-center">
-                    <div><span class="label-gold mt-0 text-[8px]">Pó(g)</span><div id="p-po-val" class="text-amber-500 font-black">--</div></div>
-                    <div><span class="label-gold mt-0 text-[8px]">Ratio</span><div id="p-ratio-val" class="text-white font-black">--</div></div>
-                    <div><span class="label-gold mt-0 text-[8px]">Clicks</span><div id="p-clicks-val" class="text-zinc-500 font-black">--</div></div>
-                    <div><span class="label-gold mt-0 text-[8px]">Temp</span><div id="p-temp-val" class="text-zinc-500 font-black">--</div></div>
+                    <div><span class="label-gold mt-0 text-[8px]">Pó(g)</span><input type="text" id="p-po-val" value="--" onfocus="handleFocus(this)" oninput="upCalc()" class="text-center text-sm text-amber-500 font-black bg-transparent border-none"></div>
+                    <div><span class="label-gold mt-0 text-[8px]">Ratio</span><input type="text" id="p-ratio-val" value="--" onfocus="handleFocus(this)" oninput="upCalc()" class="text-center text-sm text-white font-black bg-transparent border-none"></div>
+                    <div><span class="label-gold mt-0 text-[8px]">Clicks</span><input type="text" id="p-clicks-val" value="--" onfocus="handleFocus(this)" class="text-center text-sm text-zinc-500 font-black bg-transparent border-none"></div>
+                    <div><span class="label-gold mt-0 text-[8px]">Temp</span><input type="text" id="p-temp-val" value="--" onfocus="handleFocus(this)" class="text-center text-sm text-zinc-500 font-black bg-transparent border-none"></div>
                 </div>
                 <div class="bg-zinc-900 rounded-2xl py-4 px-5 mt-6 border border-zinc-800 flex justify-between items-center">
                     <span class="text-[10px] font-black text-zinc-500 uppercase italic">Água</span>
-                    <div class="text-4xl font-black text-white italic"><span id="p-total-val">0</span>ml</div>
+                    <div class="text-4xl font-black text-white italic"><span id="p-total-display">0</span>ml</div>
                 </div>
                 <div id="timer" class="text-6xl font-black my-6 text-center italic">00:00</div>
                 <button id="btn-timer-main" onclick="toggleTimer()" class="bg-green-700 text-white font-black py-4 rounded-xl w-full uppercase">Iniciar</button>
@@ -156,6 +152,16 @@
         </div>
 
         <div id="tab-diario" class="hidden"><div id="list-logs" class="space-y-3"></div></div>
+
+        <div id="tab-admin" class="hidden">
+            <h2 class="text-amber-500 font-black italic uppercase text-lg mb-4">Painel Admin</h2>
+            <div class="grid grid-cols-2 gap-2 mb-6 text-center">
+                <div class="card p-4"><span class="label-gold mt-0">Usuários</span><div id="admin-user-count" class="text-3xl font-black italic">0</div></div>
+                <div class="card p-4"><span class="label-gold mt-0">Receitas</span><div id="admin-total-receitas" class="text-3xl font-black italic">0</div></div>
+            </div>
+            <span class="label-gold">Usuários Cadastrados</span>
+            <div id="admin-user-list" class="space-y-2"></div>
+        </div>
     </div>
 
     <script>
@@ -178,9 +184,21 @@
         });
 
         function showTab(t){ 
-            if(t !== 'preparo') { clearInterval(timer); timer = null; seg = 0; document.getElementById('timer').innerText = "00:00"; document.getElementById('btn-timer-main').innerText = "INICIAR"; }
-            ['cafes','receitas','preparo','diario'].forEach(i=>{ const el = document.getElementById('tab-'+i); if(el) el.classList.toggle('hidden', i!==t); const btn = document.getElementById('btn-'+i); if(btn) btn.classList.toggle('active-tab', i===t); }); 
-            if(t==='cafes') loadG(); if(t==='receitas') loadR(); if(t==='preparo') loadPrep(); if(t==='diario') loadDiario();
+            if(t !== 'preparo') { 
+                clearInterval(timer); timer = null; seg = 0; 
+                document.getElementById('timer').innerText = "00:00"; 
+                document.getElementById('btn-timer-main').innerText = "INICIAR";
+                resetPreparo(); // Limpa ao sair
+            }
+            ['cafes','receitas','preparo','diario','admin'].forEach(i=>{ const el = document.getElementById('tab-'+i); if(el) el.classList.toggle('hidden', i!==t); const btn = document.getElementById('btn-'+i); if(btn) btn.classList.toggle('active-tab', i===t); }); 
+            if(t==='cafes') loadG(); if(t==='receitas') loadR(); if(t==='preparo') loadPrep(); if(t==='diario') loadDiario(); if(t==='admin') loadAdmin();
+        }
+
+        function resetPreparo() {
+            document.getElementById('p-g').value = "0"; document.getElementById('p-r').value = "0";
+            document.getElementById('p-po-val').value = "--"; document.getElementById('p-ratio-val').value = "--";
+            document.getElementById('p-clicks-val').value = "--"; document.getElementById('p-temp-val').value = "--";
+            document.getElementById('p-total-display').innerText = "0";
         }
 
         async function loadG() { 
@@ -243,12 +261,29 @@
             if(rid) document.getElementById('p-r').value = rid;
             const i = localData.r.find(x => x.id === document.getElementById('p-r').value);
             if(i) {
-                document.getElementById('p-total-val').innerText = i.origTotal;
-                document.getElementById('p-po-val').innerText = i.origPo + 'g';
-                document.getElementById('p-ratio-val').innerText = '1:' + i.origRatio;
-                document.getElementById('p-clicks-val').innerText = i.origClicks || '--';
-                document.getElementById('p-temp-val').innerText = (i.origTemp || '--') + '°';
+                document.getElementById('p-po-val').value = i.origPo;
+                document.getElementById('p-ratio-val').value = i.origRatio;
+                document.getElementById('p-clicks-val').value = i.origClicks || "--";
+                document.getElementById('p-temp-val').value = i.origTemp || "--";
+                upCalc();
             }
+        }
+
+        function upCalc() {
+            const p = parseFloat(document.getElementById('p-po-val').value) || 0;
+            const r = parseFloat(document.getElementById('p-ratio-val').value) || 0;
+            document.getElementById('p-total-display').innerText = Math.round(p * r);
+        }
+
+        async function loadAdmin() {
+            if(currentUser.email !== ADMIN_EMAIL) return;
+            const users = await db.collection('users').get(), receitas = await db.collection('receitas').get();
+            document.getElementById('admin-user-count').innerText = users.size;
+            document.getElementById('admin-total-receitas').innerText = receitas.size;
+            let h = ''; users.forEach(d => {
+                const u = d.data();
+                h += `<div class="card p-3 flex justify-between items-center bg-black border-zinc-800"><div><span class="text-white font-bold">@${u.nick}</span><br><span class="text-[8px] text-zinc-500 uppercase">${u.type === 'pessoal' ? '🔒 PRIVADO' : '🌎 COMUNIDADE'}</span></div><button onclick="auth.sendPasswordResetEmail('${u.email}'); alert('RESET ENVIADO!')" class="text-[8px] font-black border border-amber-600 p-2 rounded text-amber-600">RESET SENHA</button></div>`;
+            }); document.getElementById('admin-user-list').innerHTML = h;
         }
 
         async function loadDiario() { 
@@ -293,6 +328,7 @@
         function cancelEdit(t) { editIds[t] = null; document.getElementById(t+'-edit-actions').classList.add('hidden'); document.getElementById(t+'-btn-main').classList.remove('hidden'); document.querySelectorAll('#tab-'+(t==='g'?'cafes':'receitas')+' input, select, textarea').forEach(el => el.value = ""); document.getElementById('ataques-container').innerHTML = ''; }
         async function del(c, id, n) { if(confirm(`Excluir ${n}?`)) { await db.collection(c).doc(id).delete(); loadG(); loadR(); loadDiario(); } }
         function calcTotalR() { const r = parseFloat(document.getElementById('r-ratio').value)||0, p = parseFloat(document.getElementById('r-po').value)||0; document.getElementById('r-total').value = Math.round(r*p); }
+        function handleFocus(el) { if(el.value === "--") el.value = ""; el.select(); }
 
         function abrirDetalhesG(id) { 
             const i = localData.g.find(x => x.id === id); if(!i) return; 
