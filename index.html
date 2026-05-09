@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.16</title>
+    <title>Coffee Master v10.17</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -71,7 +71,6 @@
             <button id="btn-admin" class="tab-btn hidden" onclick="showTab('admin')">ADMIN</button>
         </div>
 
-        <!-- ABA GRÃOS -->
         <div id="tab-cafes">
             <div class="card p-4">
                 <span class="label-gold mt-0">Produtor</span><input type="text" id="g-prod">
@@ -95,7 +94,6 @@
             <div id="list-g" class="space-y-3"></div>
         </div>
 
-        <!-- ABA RECEITAS -->
         <div id="tab-receitas" class="hidden">
             <input type="text" id="search-r" class="search-input w-full" placeholder="FILTRAR RECEITAS...">
             <div id="list-r" class="space-y-3"></div>
@@ -236,11 +234,12 @@
                 <div class="flex justify-center mb-4"><img src="${img}" class="w-44 h-44 rounded-2xl object-cover border-2 border-zinc-800 shadow-2xl cursor-zoom-in" onclick="ampliarImagem('${img}')"></div>
                 <div><span class="label-gold">PRODUTOR</span><p class="text-white font-bold italic text-sm">${i.prod||'--'}</p></div>
                 <div><span class="label-gold">IDENTIFICAÇÃO</span><p class="text-white font-bold italic text-sm">${i.nome||'--'}</p></div>
+                <div><span class="label-gold">TORREFAÇÃO</span><p class="text-amber-500 font-bold italic text-sm">${i.torrefacao||'--'}</p></div>
                 <div class="grid grid-cols-2 gap-2">
                     <div><span class="label-gold">VARIEDADE</span><p class="text-white font-bold italic text-sm">${i.variedade||'--'}</p></div>
                     <div><span class="label-gold">PROCESSO</span><p class="text-white font-bold italic text-sm">${i.processo||'--'}</p></div>
                 </div>
-                <div><span class="label-gold">TORREFAÇÃO | TORRA</span><p class="text-amber-500 font-bold italic text-sm">${i.torrefacao||'--'} | ${i.torra||'--'}</p></div>
+                <div><span class="label-gold">ALTITUDE | TORRA</span><p class="text-amber-500 font-bold italic text-sm">${i.altitude||'--'} | ${i.torra||'--'}</p></div>
                 <div><span class="label-gold">NOTAS</span><p class="text-zinc-400 italic text-sm">"${i.notas||'--'}"</p></div>
             `; 
             document.getElementById('modal-detalhes').classList.remove('hidden'); 
