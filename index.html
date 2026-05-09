@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.21</title>
+    <title>Coffee Master v10.22</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,6 +22,8 @@
         .btn-gold { background: #f59e0b; color: #000; font-weight: 900; padding: 18px; border-radius: 18px; width: 100%; text-transform: uppercase; font-size: 14px; margin-top: 15px; cursor: pointer; }
         .tab-btn { background: #111; color: #444; flex: 1; padding: 14px 5px; border-radius: 14px; font-size: 10px; font-weight: 900; margin: 3px; border: 1px solid #222; }
         .active-tab { background: #f59e0b; color: #000; border-color: #fbbf24; }
+        .step-box { background: #161616; padding: 12px; border-radius: 16px; text-align: center; border: 2px solid #262626; width: 145px; flex-shrink: 0; transition: all 0.4s; }
+        .step-box-active { border-color: #f59e0b !important; background: #221a05; box-shadow: 0 0 20px rgba(245,158,11,0.15); }
         #auth-screen, #modal-feedback, #pix-modal, #modal-detalhes, #modal-zoom, #admin-user-details { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; z-index: 2000; padding: 20px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
         #modal-zoom { background: rgba(0,0,0,0.95); z-index: 3000; align-items: center; justify-content: center; padding: 0; }
         .hidden { display: none !important; }
@@ -31,31 +33,40 @@
         .grain-thumb { width: 75px; height: 75px; border-radius: 16px; object-fit: cover; background: #222; border: 1px solid #333; flex-shrink: 0; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .atk-row { background: #111; padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #222; }
-        .admin-tag { font-size: 7px; background: #222; color: #f59e0b; padding: 2px 4px; border-radius: 4px; margin-left: 4px; border: 0.5px solid #f59e0b; }
+        input[type=range] { -webkit-appearance: none; background: #333; height: 6px; border-radius: 5px; margin: 10px 0; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #f59e0b; }
     </style>
 </head>
 <body class="p-3 max-w-lg mx-auto">
     <!-- MODAIS -->
     <div id="modal-zoom" class="hidden" onclick="this.classList.add('hidden')"><img id="img-ampliada" class="max-w-[95%] max-h-[80%] rounded-2xl border-2 border-amber-500 shadow-2xl"></div>
-    <div id="modal-detalhes" class="hidden" onclick="fecharDetalhes()"><div class="card w-full max-w-sm mx-auto border-amber-500 shadow-[0_0_50px_rgba(245,158,11,0.1)]" onclick="event.stopPropagation()"><h3 class="text-amber-500 font-black italic uppercase text-xl mb-4 text-center">Ficha Técnica</h3><div id="detalhes-content" class="space-y-4"></div><button class="btn-gold w-full mt-8" onclick="fecharDetalhes()">VOLTAR</button></div></div>
-    <div id="pix-modal" class="hidden" onclick="closePix()"><div class="card w-full max-w-sm mx-auto text-center" onclick="event.stopPropagation()"><h2 class="text-amber-500 font-black italic uppercase mb-4">Apoie o Coffee Master</h2><div id="pix-qrcode" class="flex justify-center mb-4 bg-white p-2 rounded-lg"></div><button class="btn-gold w-full" onclick="copyPix()">Copiar Chave Pix</button><button class="text-zinc-500 text-[10px] mt-4 uppercase font-bold" onclick="closePix()">Fechar</button></div></div>
     
+    <div id="modal-detalhes" class="hidden" onclick="fecharDetalhes()"><div class="card w-full max-w-sm mx-auto border-amber-500" onclick="event.stopPropagation()"><h3 class="text-amber-500 font-black italic uppercase text-xl mb-4 text-center">Ficha Técnica</h3><div id="detalhes-content" class="space-y-4"></div><button class="btn-gold w-full mt-8" onclick="fecharDetalhes()">VOLTAR</button></div></div>
+    
+    <div id="admin-user-details" class="hidden"><div class="card w-full max-w-sm mx-auto border-amber-600"><h3 id="adm-u-nick" class="text-amber-500 font-black italic uppercase text-xl mb-4 text-center">Usuário</h3><div id="adm-u-content" class="space-y-4 overflow-y-auto max-h-[400px]"></div><button class="btn-gold w-full mt-6" onclick="document.getElementById('admin-user-details').classList.add('hidden')">VOLTAR</button></div></div>
+
     <div id="modal-feedback" class="hidden"><div class="card w-full max-w-sm mx-auto border-amber-600 text-center">
         <h3 class="text-amber-500 font-black italic uppercase text-xl mb-4">Como ficou?</h3>
         <div class="flex justify-center mb-4"><span class="star" onclick="setRating(1)">★</span><span class="star" onclick="setRating(2)">★</span><span class="star" onclick="setRating(3)">★</span><span class="star" onclick="setRating(4)">★</span><span class="star" onclick="setRating(5)">★</span></div>
-        <span class="label-gold">Observações</span><textarea id="f-obs" rows="3"></textarea>
-        <button class="btn-gold w-full" onclick="salvarFeedback()">Salvar no Diário</button>
-        <button class="text-zinc-500 text-[10px] mt-4 font-bold" onclick="fecharFeedback()">Pular</button>
+        <div class="grid grid-cols-2 gap-4 text-left px-2">
+            <div><span class="label-gold mt-0">Doçura</span><input type="range" id="f-doce" min="0" max="5" value="3"></div>
+            <div><span class="label-gold mt-0">Acidez</span><input type="range" id="f-acidez" min="0" max="5" value="3"></div>
+            <div><span class="label-gold mt-0">Amargor</span><input type="range" id="f-amargor" min="0" max="5" value="3"></div>
+            <div><span class="label-gold mt-0">Corpo</span><input type="range" id="f-corpo" min="0" max="5" value="3"></div>
+        </div>
+        <span class="label-gold mt-4">Observações</span><textarea id="f-obs" rows="3"></textarea>
+        <button class="btn-gold w-full mt-4" onclick="salvarFeedback()">Salvar no Diário</button>
+        <button class="text-zinc-500 text-[10px] mt-4 font-bold uppercase" onclick="fecharFeedback()">Pular</button>
     </div></div>
 
-    <!-- AUTH -->
+    <!-- APP -->
     <div id="auth-screen">
         <div class="card w-full max-w-sm mx-auto text-center">
             <h1 class="text-3xl font-black text-amber-500 italic uppercase mb-8">COFFEE MASTER</h1>
             <div id="login-form">
                 <input type="email" id="login-email" placeholder="E-MAIL"><input type="password" id="login-pass" placeholder="SENHA">
                 <button class="btn-gold w-full mt-6" onclick="handleLogin()">Entrar</button>
-                <p class="text-[10px] text-center mt-6 font-black uppercase text-zinc-500">Novo? <button class="text-amber-500 underline" onclick="toggleAuth(false)">Criar agora</button></p>
+                <p class="text-[10px] mt-6 uppercase text-zinc-500 underline" onclick="toggleAuth(false)">Criar agora</p>
             </div>
             <div id="signup-form" class="hidden text-left">
                 <span class="label-gold">Nickname</span><input type="text" id="sign-nick">
@@ -63,16 +74,15 @@
                 <span class="label-gold">Senha</span><input type="password" id="sign-pass">
                 <span class="label-gold">Perfil</span><select id="sign-type"><option value="pessoal">PESSOAL (PRIVADO)</option><option value="comunidade" selected>COMUNIDADE (PÚBLICO)</option></select>
                 <button class="btn-gold w-full mt-6" onclick="handleSignup()">Criar Conta</button>
-                <button class="text-[10px] w-full text-center mt-6 font-black uppercase text-zinc-500 underline" onclick="toggleAuth(true)">Já tenho conta</button>
+                <p class="text-[10px] mt-6 text-center uppercase text-zinc-500 underline" onclick="toggleAuth(true)">Já tenho conta</p>
             </div>
         </div>
     </div>
 
-    <!-- APP PRINCIPAL -->
     <div id="main-app" class="hidden">
         <div class="flex justify-between items-center mb-5 sticky top-0 bg-black z-50 py-2">
             <div><h1 class="text-2xl font-black text-amber-500 italic uppercase leading-none">COFFEE MASTER</h1><span id="user-display" class="text-[8px] font-black text-zinc-600 uppercase leading-none"></span></div>
-            <div class="flex gap-2"><button onclick="openPix()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-amber-600 text-amber-500 italic uppercase leading-none">Pagar um café ☕</button><button onclick="auth.signOut()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-zinc-700 text-zinc-500">Sair</button></div>
+            <button onclick="auth.signOut()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-zinc-700 text-zinc-500">Sair</button>
         </div>
         
         <div id="tabs-container" class="flex mb-6 bg-black p-1 rounded-2xl sticky top-[55px] z-50 border border-zinc-800 shadow-2xl overflow-x-auto no-scrollbar">
@@ -87,15 +97,17 @@
             <div class="card p-4">
                 <span class="label-gold mt-0">Produtor</span><input type="text" id="g-prod">
                 <span class="label-gold">Grão</span><input type="text" id="g-nome">
-                <span class="label-gold">Variedade</span><input type="text" id="g-variedade">
-                <span class="label-gold">Processo</span><input type="text" id="g-processo">
                 <div class="flex gap-2">
-                    <div class="flex-1"><span class="label-gold">Altitude</span><input type="text" id="g-altitude"></div>
-                    <div class="flex-1"><span class="label-gold">Torrefação</span><input type="text" id="g-torrefacao"></div>
+                    <div class="flex-1"><span class="label-gold">Variedade</span><input type="text" id="g-variedade"></div>
+                    <div class="flex-1"><span class="label-gold">Processo</span><input type="text" id="g-processo"></div>
                 </div>
                 <div class="flex gap-2">
-                    <div class="flex-1"><span class="label-gold">Torra</span><select id="g-torra"><option value="" disabled selected>SELECIONAR</option><option>CLARA</option><option>MÉDIA-CLARA</option><option>MÉDIA</option><option>ESCURA</option></select></div>
-                    <div class="flex-1"><span class="label-gold">DATA DA TORRA</span><input type="date" id="g-data"></div>
+                    <div class="flex-1"><span class="label-gold">Torrefação</span><input type="text" id="g-torrefacao"></div>
+                    <div class="flex-1"><span class="label-gold">Altitude</span><input type="text" id="g-altitude"></div>
+                </div>
+                <div class="flex gap-2">
+                    <div class="flex-1"><span class="label-gold">Torra</span><select id="g-torra"><option value="" disabled selected>SELECIONAR</option><option>CLARA</option><option>MÉDIA</option><option>ESCURA</option></select></div>
+                    <div class="flex-1"><span class="label-gold">DATA TORRA</span><input type="date" id="g-data"></div>
                 </div>
                 <span class="label-gold">Notas Sensoriais</span><textarea id="g-notas" rows="2"></textarea>
                 <span class="label-gold">Foto</span><input type="file" id="g-photo-input" accept="image/*" class="text-[10px] bg-transparent border-dashed border-zinc-700 p-2">
@@ -109,8 +121,8 @@
         <div id="tab-receitas" class="hidden">
             <div class="card p-4">
                 <span class="label-gold mt-0">Nome da Receita</span><input type="text" id="r-nome">
-                <span class="label-gold">Método</span><select id="r-metodo"><option value="" disabled selected>SELECIONAR</option><option>V60</option><option>AEROPRESS</option><option>KOAR</option><option>PRENSA FRANCESA</option><option>MOKA</option><option>OUTROS</option></select>
-                <div class="grid grid-cols-3 gap-2 border-t border-zinc-800 mt-4 pt-2">
+                <span class="label-gold">Método</span><select id="r-metodo"><option value="" disabled selected>SELECIONAR</option><option>V60</option><option>AEROPRESS</option><option>KOAR</option><option>OUTROS</option></select>
+                <div class="grid grid-cols-3 gap-2">
                     <div><span class="label-gold">Ratio</span><input type="number" id="r-ratio" step="0.1" oninput="calcTotalR()"></div>
                     <div><span class="label-gold">Pó (g)</span><input type="number" id="r-po" oninput="calcTotalR()"></div>
                     <div><span class="label-gold">Total</span><input type="number" id="r-total" readonly class="text-amber-500 font-bold bg-transparent border-none"></div>
@@ -128,11 +140,10 @@
                 <div id="r-edit-actions" class="hidden flex gap-2 mt-4"><button class="btn-gold flex-1 mt-0" onclick="saveR()">Atualizar</button><button class="bg-zinc-800 text-zinc-400 font-black py-4 px-4 rounded-xl flex-[0.3]" onclick="cancelEdit('r')">X</button></div>
                 <button class="btn-gold w-full mt-4" onclick="saveR()" id="r-btn-main">Salvar Receita</button>
             </div>
-            <input type="text" id="search-r" class="search-input w-full" placeholder="FILTRAR RECEITAS...">
             <div id="list-r" class="space-y-3"></div>
         </div>
 
-        <div id="tab-preparo" class="hidden">
+        <div id="tab-preparo" class="hidden text-center">
             <div class="card border-amber-600 bg-black p-5">
                 <select id="p-g" onchange="upCalc()"></select><select id="p-r" onchange="handleRecipeSelect()"></select>
                 <div class="grid grid-cols-4 gap-1 mt-4 text-center">
@@ -141,25 +152,25 @@
                     <div><span class="label-gold mt-0 text-[8px]">Clicks</span><input type="text" id="p-clicks-val" value="--" onfocus="handleFocus(this)" class="text-center text-sm text-zinc-500 font-black bg-transparent border-none"></div>
                     <div><span class="label-gold mt-0 text-[8px]">Temp</span><input type="text" id="p-temp-val" value="--" onfocus="handleFocus(this)" class="text-center text-sm text-zinc-500 font-black bg-transparent border-none"></div>
                 </div>
-                <div class="bg-zinc-900 rounded-2xl py-4 px-5 mt-6 border border-zinc-800 flex justify-between items-center">
+                <div class="bg-zinc-900 rounded-2xl py-4 px-5 mt-6 border border-zinc-800 flex justify-between items-center shadow-inner">
                     <span class="text-[10px] font-black text-zinc-500 uppercase italic">Água</span>
                     <div class="text-4xl font-black text-white italic"><span id="p-total-display">0</span>ml</div>
                 </div>
-                <div id="timer" class="text-6xl font-black my-6 text-center italic">00:00</div>
+                <div id="p-steps" class="flex gap-3 mt-6 overflow-x-auto pb-4 no-scrollbar"></div>
+                <div id="timer" class="text-6xl font-black my-6 italic">00:00</div>
                 <button id="btn-timer-main" onclick="toggleTimer()" class="bg-green-700 text-white font-black py-4 rounded-xl w-full uppercase">Iniciar</button>
                 <button onclick="abrirFeedback()" class="bg-amber-600 text-black font-black py-4 rounded-xl w-full mt-3 text-sm uppercase italic">Finalizar</button>
             </div>
         </div>
 
         <div id="tab-diario" class="hidden"><div id="list-logs" class="space-y-3"></div></div>
-
-        <div id="tab-admin" class="hidden">
-            <h2 class="text-amber-500 font-black italic uppercase text-lg mb-4">Painel Admin</h2>
-            <div class="grid grid-cols-2 gap-2 mb-6 text-center">
+        
+        <div id="tab-admin" class="hidden text-center">
+            <h2 class="text-amber-500 font-black italic uppercase text-lg mb-4">Admin</h2>
+            <div class="grid grid-cols-2 gap-2 mb-6">
                 <div class="card p-4"><span class="label-gold mt-0">Usuários</span><div id="admin-user-count" class="text-3xl font-black italic">0</div></div>
                 <div class="card p-4"><span class="label-gold mt-0">Receitas</span><div id="admin-total-receitas" class="text-3xl font-black italic">0</div></div>
             </div>
-            <span class="label-gold">Usuários Cadastrados</span>
             <div id="admin-user-list" class="space-y-2"></div>
         </div>
     </div>
@@ -167,7 +178,7 @@
     <script>
         const config = { apiKey: "AIzaSyCbIsrGjuu6KN-A0xpZUC6ID9aOHBEIJSE", authDomain: "coffee-master-e1f5c.firebaseapp.com", projectId: "coffee-master-e1f5c", storageBucket: "coffee-master-e1f5c.firebasestorage.app", messagingSenderId: "171441357303", appId: "1:171441357303:web:c85dc841ee73f6f29e2ef2" };
         firebase.initializeApp(config); const db = firebase.firestore(); const auth = firebase.auth();
-        let currentUser = null, userProfile = null, timer = null, seg = 0, editIds = { g: null, r: null }, localData = { g: [], r: [] }, notaSelecionada = 0;
+        let currentUser = null, userProfile = null, timer = null, seg = 0, editIds = { g: null, r: null }, localData = { g: [], r: [] }, activeSteps = [], notaSelecionada = 0;
         const DEFAULT_IMG = "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=150&h=150&fit=crop&q=80";
         const ADMIN_EMAIL = 'alanpocos@gmail.com';
 
@@ -184,21 +195,9 @@
         });
 
         function showTab(t){ 
-            if(t !== 'preparo') { 
-                clearInterval(timer); timer = null; seg = 0; 
-                document.getElementById('timer').innerText = "00:00"; 
-                document.getElementById('btn-timer-main').innerText = "INICIAR";
-                resetPreparo(); // Limpa ao sair
-            }
+            if(t !== 'preparo') { clearInterval(timer); timer = null; seg = 0; document.getElementById('timer').innerText = "00:00"; document.getElementById('btn-timer-main').innerText = "INICIAR"; resetPreparo(); }
             ['cafes','receitas','preparo','diario','admin'].forEach(i=>{ const el = document.getElementById('tab-'+i); if(el) el.classList.toggle('hidden', i!==t); const btn = document.getElementById('btn-'+i); if(btn) btn.classList.toggle('active-tab', i===t); }); 
             if(t==='cafes') loadG(); if(t==='receitas') loadR(); if(t==='preparo') loadPrep(); if(t==='diario') loadDiario(); if(t==='admin') loadAdmin();
-        }
-
-        function resetPreparo() {
-            document.getElementById('p-g').value = "0"; document.getElementById('p-r').value = "0";
-            document.getElementById('p-po-val').value = "--"; document.getElementById('p-ratio-val').value = "--";
-            document.getElementById('p-clicks-val').value = "--"; document.getElementById('p-temp-val').value = "--";
-            document.getElementById('p-total-display').innerText = "0";
         }
 
         async function loadG() { 
@@ -261,106 +260,74 @@
             if(rid) document.getElementById('p-r').value = rid;
             const i = localData.r.find(x => x.id === document.getElementById('p-r').value);
             if(i) {
-                document.getElementById('p-po-val').value = i.origPo;
-                document.getElementById('p-ratio-val').value = i.origRatio;
-                document.getElementById('p-clicks-val').value = i.origClicks || "--";
-                document.getElementById('p-temp-val').value = i.origTemp || "--";
+                document.getElementById('p-po-val').value = i.origPo; document.getElementById('p-ratio-val').value = i.origRatio;
+                document.getElementById('p-clicks-val').value = i.origClicks || "--"; document.getElementById('p-temp-val').value = i.origTemp || "--";
                 upCalc();
             }
         }
 
         function upCalc() {
-            const p = parseFloat(document.getElementById('p-po-val').value) || 0;
-            const r = parseFloat(document.getElementById('p-ratio-val').value) || 0;
-            document.getElementById('p-total-display').innerText = Math.round(p * r);
+            const p = parseFloat(document.getElementById('p-po-val').value) || 0, r = parseFloat(document.getElementById('p-ratio-val').value) || 0;
+            const total = Math.round(p * r); document.getElementById('p-total-display').innerText = total;
+            const i = localData.r.find(x => x.id === document.getElementById('p-r').value);
+            if(!i) return;
+            const ratioF = total / i.origTotal;
+            let h = '', sum = 0;
+            if(i.bloomMl > 0) { sum += Math.round(i.bloomMl * ratioF); h += renderStepSquare('BLOOM', Math.round(i.bloomMl * ratioF), sum, i.bloomSec); }
+            (i.ataques || []).forEach((a, idx) => { sum += Math.round(a.ml * ratioF); h += renderStepSquare(`ATK ${idx+1}`, Math.round(a.ml * ratioF), sum, a.sec); });
+            document.getElementById('p-steps').innerHTML = h;
+        }
+
+        function renderStepSquare(title, ml, cum, sec) {
+            return `<div class="step-box"><div class="text-[9px] text-zinc-600 font-black uppercase">${title}</div><div class="text-xl font-black italic text-white mt-1">${ml}ml</div><div class="text-[10px] text-amber-600 font-bold uppercase mt-1">SOMA: ${cum}ml</div><div class="text-[8px] text-zinc-500 font-bold mt-1">TEMPO: ${sec}s</div></div>`;
         }
 
         async function loadAdmin() {
             if(currentUser.email !== ADMIN_EMAIL) return;
-            const users = await db.collection('users').get(), receitas = await db.collection('receitas').get();
-            document.getElementById('admin-user-count').innerText = users.size;
-            document.getElementById('admin-total-receitas').innerText = receitas.size;
-            let h = ''; users.forEach(d => {
-                const u = d.data();
-                h += `<div class="card p-3 flex justify-between items-center bg-black border-zinc-800"><div><span class="text-white font-bold">@${u.nick}</span><br><span class="text-[8px] text-zinc-500 uppercase">${u.type === 'pessoal' ? '🔒 PRIVADO' : '🌎 COMUNIDADE'}</span></div><button onclick="auth.sendPasswordResetEmail('${u.email}'); alert('RESET ENVIADO!')" class="text-[8px] font-black border border-amber-600 p-2 rounded text-amber-600">RESET SENHA</button></div>`;
-            }); document.getElementById('admin-user-list').innerHTML = h;
+            const uSnap = await db.collection('users').get(), rSnap = await db.collection('receitas').get();
+            document.getElementById('admin-user-count').innerText = uSnap.size; document.getElementById('admin-total-receitas').innerText = rSnap.size;
+            let h = ''; uSnap.forEach(d => { const u = d.data(); h += `<div class="card p-3 flex justify-between items-center cursor-pointer active:bg-zinc-900" onclick="verUsuarioAdmin('${u.uid}')"><div><span class="text-white font-bold italic">@${u.nick}</span><br><span class="text-[8px] text-zinc-500 font-black uppercase">${u.type === 'pessoal' ? '🔒 PRIVADO' : '🌎 COMUNIDADE'}</span></div><button onclick="event.stopPropagation(); auth.sendPasswordResetEmail('${u.email}'); alert('Reset enviado!')" class="text-[8px] font-black border border-amber-600 p-2 rounded text-amber-600">RESET</button></div>`; });
+            document.getElementById('admin-user-list').innerHTML = h;
         }
+
+        async function verUsuarioAdmin(uid) {
+            const u = (await db.collection('users').doc(uid).get()).data();
+            document.getElementById('adm-u-nick').innerText = `@${u.nick}`;
+            const gCount = (await db.collection('cafes').where('owner_uid', '==', uid).get()).size;
+            const rCount = (await db.collection('receitas').where('owner_uid', '==', uid).get()).size;
+            document.getElementById('adm-u-content').innerHTML = `<div class="text-center"><p class="text-white font-black text-2xl">${gCount} Grãos</p><p.text-white font-black text-2xl">${rCount} Receitas</p></div>`;
+            document.getElementById('admin-user-details').classList.remove('hidden');
+        }
+
+        function resetPreparo() { document.getElementById('p-g').value="0"; document.getElementById('p-r').value="0"; document.getElementById('p-po-val').value="--"; document.getElementById('p-ratio-val').value="--"; document.getElementById('p-total-display').innerText="0"; document.getElementById('p-steps').innerHTML=""; }
 
         async function loadDiario() { 
             const snap = await db.collection('logs').where('owner_uid', '==', currentUser.uid).get();
             let logs = snap.docs.map(d => ({id: d.id, ...d.data()})); logs.sort((a,b) => (b.ts?b.ts.seconds:0) - (a.ts?a.ts.seconds:0));
             let h = ''; logs.forEach(i => {
-                h += `<div class="card p-4 border-l-4 border-l-amber-600 shadow-none"><div class="text-[10px] text-zinc-500 font-bold">${i.data}</div><div class="text-lg font-black italic text-white leading-tight mt-1">${i.grao}</div><div class="text-xs font-bold text-amber-500 uppercase mt-1">${i.receita} | ${i.tempoTotal}</div><p class="mt-2 text-xs italic text-zinc-400">"${i.observacoes || '--'}"</p><div class="mt-3 flex justify-between items-center"><div class="text-xl text-amber-500">${'★'.repeat(i.nota)}${'☆'.repeat(5-i.nota)}</div><button onclick="del('logs','${i.id}','Log')" class="text-xs p-2 bg-zinc-900 rounded-lg text-red-800 font-black">🗑️</button></div></div>`;
-            }); document.getElementById('list-logs').innerHTML = h || '<div class="text-center p-10 text-zinc-600 font-black uppercase italic">Vazio</div>';
+                h += `<div class="card p-4 border-l-4 border-l-amber-600 shadow-none"><div class="text-[10px] text-zinc-500 font-bold">${i.data}</div><div class="text-lg font-black italic text-white leading-tight mt-1">${i.grao}</div><div class="text-xs font-bold text-amber-500 uppercase mt-1">${i.receita} | ${i.tempoTotal}</div><div class="grid grid-cols-4 gap-1 mt-2 text-[8px] font-black text-zinc-600"><div>DOC:${i.docura||0}</div><div>ACI:${i.acidez||0}</div><div>AMA:${i.amargor||0}</div><div>COR:${i.corpo||0}</div></div><p class="mt-2 text-xs italic text-zinc-400">"${i.observacoes || '--'}"</p><div class="mt-3 flex justify-between items-center"><div class="text-xl text-amber-500">${'★'.repeat(i.nota)}</div><button onclick="del('logs','${i.id}','Log')" class="text-xs p-2 bg-zinc-900 rounded-lg text-red-800 font-black">🗑️</button></div></div>`;
+            }); document.getElementById('list-logs').innerHTML = h;
         }
 
-        async function processImage(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader(); reader.onload = (e) => {
-                    const img = new Image(); img.onload = () => {
-                        const canvas = document.createElement('canvas'); const size = 600; canvas.width = size; canvas.height = size;
-                        const min = Math.min(img.width, img.height); canvas.getContext('2d').drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, size, size);
-                        resolve(canvas.toDataURL('image/jpeg', 0.8));
-                    }; img.src = e.target.result;
-                }; reader.readAsDataURL(file);
-            });
-        }
-
-        function addAtackField(ml='', sec='', obs='') {
-            document.getElementById('ataques-container').insertAdjacentHTML('beforeend', `<div class="atk-row"><div class="flex gap-2"><div><span class="label-gold mt-0">ML</span><input type="number" class="atk-ml" value="${ml}"></div><div><span class="label-gold mt-0">SEG</span><input type="number" class="atk-sec" value="${sec}"></div><button onclick="this.parentElement.parentElement.remove()" class="text-zinc-600 font-black pt-5 px-2">X</button></div><span class="label-gold mt-1">Obs</span><input type="text" class="atk-obs" value="${obs}"></div>`);
-        }
-
-        async function saveG() {
-            const file = document.getElementById('g-photo-input').files[0]; const original = editIds.g ? localData.g.find(x => x.id === editIds.g) : null;
-            const d = { prod: document.getElementById('g-prod').value.toUpperCase(), nome: document.getElementById('g-nome').value.toUpperCase(), variedade: document.getElementById('g-variedade').value.toUpperCase(), processo: document.getElementById('g-processo').value.toUpperCase(), torrefacao: document.getElementById('g-torrefacao').value.toUpperCase(), torra: document.getElementById('g-torra').value, altitude: document.getElementById('g-altitude').value, data: document.getElementById('g-data').value, notas: document.getElementById('g-notas').value.toUpperCase(), owner_uid: original ? original.owner_uid : currentUser.uid, owner_nick: original ? original.owner_nick : userProfile.nick, visibilidade: original ? original.visibilidade : (userProfile.type === 'pessoal' ? 'privado' : 'publico'), ts: firebase.firestore.FieldValue.serverTimestamp() };
-            if(file) d.photo = await processImage(file); if(editIds.g) await db.collection('cafes').doc(editIds.g).update(d); else await db.collection('cafes').add(d); cancelEdit('g'); loadG();
-        }
-
-        async function saveR() {
-            const atks = []; document.querySelectorAll('.atk-row').forEach(row => { atks.push({ ml: parseFloat(row.querySelector('.atk-ml').value)||0, sec: parseFloat(row.querySelector('.atk-sec').value)||0, obs: row.querySelector('.atk-obs').value.toUpperCase() }); });
-            const original = editIds.r ? localData.r.find(x => x.id === editIds.r) : null;
-            const d = { nome: document.getElementById('r-nome').value.toUpperCase(), metodo: document.getElementById('r-metodo').value, origRatio: parseFloat(document.getElementById('r-ratio')), origPo: parseFloat(document.getElementById('r-po')), origTotal: parseInt(document.getElementById('r-total').value), origClicks: document.getElementById('r-clicks').value, origTemp: document.getElementById('r-temp').value, bloomMl: parseFloat(document.getElementById('r-bloom-ml').value)||0, bloomSec: parseFloat(document.getElementById('r-bloom-sec').value)||0, ataques: atks, owner_uid: original ? original.owner_uid : currentUser.uid, owner_nick: original ? original.owner_nick : userProfile.nick, visibilidade: original ? original.visibilidade : (userProfile.type === 'pessoal' ? 'privado' : 'publico'), ts: firebase.firestore.FieldValue.serverTimestamp() };
-            if(editIds.r) await db.collection('receitas').doc(editIds.r).update(d); else await db.collection('receitas').add(d); cancelEdit('r'); loadR();
-        }
-
+        async function processImage(file) { return new Promise((resolve) => { const reader = new FileReader(); reader.onload = (e) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = 600; canvas.height = 600; canvas.getContext('2d').drawImage(img, (img.width-Math.min(img.width,img.height))/2, (img.height-Math.min(img.width,img.height))/2, Math.min(img.width,img.height), Math.min(img.width,img.height), 0, 0, 600, 600); resolve(canvas.toDataURL('image/jpeg', 0.8)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }); }
+        function addAtackField(ml='', sec='', obs='') { document.getElementById('ataques-container').insertAdjacentHTML('beforeend', `<div class="atk-row"><div class="flex gap-2"><div><span class="label-gold mt-0">ML</span><input type="number" class="atk-ml" value="${ml}"></div><div><span class="label-gold mt-0">SEG</span><input type="number" class="atk-sec" value="${sec}"></div><button onclick="this.parentElement.parentElement.remove()" class="text-zinc-600 font-black pt-5 px-2">X</button></div><input type="text" class="atk-obs mt-1 text-xs" placeholder="Obs..." value="${obs}"></div>`); }
+        async function saveG() { const file = document.getElementById('g-photo-input').files[0]; const original = editIds.g ? localData.g.find(x => x.id === editIds.g) : null; const d = { prod: document.getElementById('g-prod').value.toUpperCase(), nome: document.getElementById('g-nome').value.toUpperCase(), variedade: document.getElementById('g-variedade').value.toUpperCase(), processo: document.getElementById('g-processo').value.toUpperCase(), torrefacao: document.getElementById('g-torrefacao').value.toUpperCase(), torra: document.getElementById('g-torra').value, altitude: document.getElementById('g-altitude').value, data: document.getElementById('g-data').value, notas: document.getElementById('g-notas').value.toUpperCase(), owner_uid: original ? original.owner_uid : currentUser.uid, owner_nick: original ? original.owner_nick : userProfile.nick, visibilidade: original ? original.visibilidade : (userProfile.type === 'pessoal' ? 'privado' : 'publico'), ts: firebase.firestore.FieldValue.serverTimestamp() }; if(file) d.photo = await processImage(file); if(editIds.g) await db.collection('cafes').doc(editIds.g).update(d); else await db.collection('cafes').add(d); cancelEdit('g'); loadG(); }
+        async function saveR() { const atks = []; document.querySelectorAll('.atk-row').forEach(row => { atks.push({ ml: parseFloat(row.querySelector('.atk-ml').value)||0, sec: parseFloat(row.querySelector('.atk-sec').value)||0, obs: row.querySelector('.atk-obs').value.toUpperCase() }); }); const original = editIds.r ? localData.r.find(x => x.id === editIds.r) : null; const d = { nome: document.getElementById('r-nome').value.toUpperCase(), metodo: document.getElementById('r-metodo').value, origRatio: parseFloat(document.getElementById('r-ratio')), origPo: parseFloat(document.getElementById('r-po')), origTotal: parseInt(document.getElementById('r-total').value), origClicks: document.getElementById('r-clicks').value, origTemp: document.getElementById('r-temp').value, bloomMl: parseFloat(document.getElementById('r-bloom-ml').value)||0, bloomSec: parseFloat(document.getElementById('r-bloom-sec').value)||0, ataques: atks, owner_uid: original ? original.owner_uid : currentUser.uid, owner_nick: original ? original.owner_nick : userProfile.nick, visibilidade: original ? original.visibilidade : (userProfile.type === 'pessoal' ? 'privado' : 'publico'), ts: firebase.firestore.FieldValue.serverTimestamp() }; if(editIds.r) await db.collection('receitas').doc(editIds.r).update(d); else await db.collection('receitas').add(d); cancelEdit('r'); loadR(); }
         function editG(id) { const i = localData.g.find(x => x.id === id); if(!i) return; editIds.g = id; document.getElementById('g-prod').value = i.prod; document.getElementById('g-nome').value = i.nome; document.getElementById('g-variedade').value = i.variedade; document.getElementById('g-processo').value = i.processo || ''; document.getElementById('g-torrefacao').value = i.torrefacao || ''; document.getElementById('g-torra').value = i.torra || ''; document.getElementById('g-altitude').value = i.altitude || ''; document.getElementById('g-data').value = i.data || ''; document.getElementById('g-notas').value = i.notas || ''; document.getElementById('g-edit-actions').classList.remove('hidden'); document.getElementById('g-btn-main').classList.add('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
         function editR(id) { const i = localData.r.find(x => x.id === id); if(!i) return; editIds.r = id; document.getElementById('r-nome').value = i.nome; document.getElementById('r-metodo').value = i.metodo || ''; document.getElementById('r-ratio').value = i.origRatio; document.getElementById('r-po').value = i.origPo; document.getElementById('r-total').value = i.origTotal; document.getElementById('r-clicks').value = i.origClicks || ''; document.getElementById('r-temp').value = i.origTemp || ''; document.getElementById('r-bloom-ml').value = i.bloomMl || ''; document.getElementById('r-bloom-sec').value = i.bloomSec || ''; document.getElementById('ataques-container').innerHTML = ''; (i.ataques || []).forEach(a => addAtackField(a.ml, a.sec, a.obs)); document.getElementById('r-edit-actions').classList.remove('hidden'); document.getElementById('r-btn-main').classList.add('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
         function cancelEdit(t) { editIds[t] = null; document.getElementById(t+'-edit-actions').classList.add('hidden'); document.getElementById(t+'-btn-main').classList.remove('hidden'); document.querySelectorAll('#tab-'+(t==='g'?'cafes':'receitas')+' input, select, textarea').forEach(el => el.value = ""); document.getElementById('ataques-container').innerHTML = ''; }
         async function del(c, id, n) { if(confirm(`Excluir ${n}?`)) { await db.collection(c).doc(id).delete(); loadG(); loadR(); loadDiario(); } }
         function calcTotalR() { const r = parseFloat(document.getElementById('r-ratio').value)||0, p = parseFloat(document.getElementById('r-po').value)||0; document.getElementById('r-total').value = Math.round(r*p); }
         function handleFocus(el) { if(el.value === "--") el.value = ""; el.select(); }
-
-        function abrirDetalhesG(id) { 
-            const i = localData.g.find(x => x.id === id); if(!i) return; 
-            const img = (i.photo && i.photo.length > 100) ? i.photo : DEFAULT_IMG;
-            document.getElementById('detalhes-content').innerHTML = `
-                <div class="flex justify-center mb-4"><img src="${img}" class="w-44 h-44 rounded-2xl object-cover border-2 border-zinc-800 shadow-2xl cursor-zoom-in" onclick="ampliarImagem('${img}')"></div>
-                <div><span class="label-gold">PRODUTOR</span><p class="text-white font-bold italic text-sm">${i.prod||'--'}</p></div>
-                <div><span class="label-gold">IDENTIFICAÇÃO</span><p class="text-white font-bold italic text-sm">${i.nome||'--'}</p></div>
-                <div><span class="label-gold">TORREFAÇÃO</span><p class="text-amber-500 font-bold italic text-sm">${i.torrefacao||'--'}</p></div>
-                <div class="grid grid-cols-2 gap-2"><div><span class="label-gold">VARIEDADE</span><p class="text-white font-bold italic text-sm">${i.variedade||'--'}</p></div><div><span class="label-gold">PROCESSO</span><p class="text-white font-bold italic text-sm">${i.processo||'--'}</p></div></div>
-                <div><span class="label-gold">ALTITUDE | TORRA</span><p class="text-white font-bold italic text-sm"><span class="text-white">${i.altitude||'--'}</span> | <span class="text-white">${i.torra||'--'}</span></p></div>
-                <div><span class="label-gold">NOTAS</span><p class="text-zinc-400 italic text-sm">"${i.notas||'--'}"</p></div>
-            `; document.getElementById('modal-detalhes').classList.remove('hidden'); 
-        }
-
-        function abrirDetalhesR(id) {
-            const i = localData.r.find(x => x.id === id); if(!i) return;
-            let atkH = (i.ataques || []).map((a, idx) => `<p class="text-zinc-500 text-[10px]">Atk ${idx+1}: ${a.ml}ml em ${a.sec}s</p>`).join('');
-            document.getElementById('detalhes-content').innerHTML = `<div><span class="label-gold">RECEITA</span><p class="text-white font-bold italic text-sm">${i.nome}</p></div><div class="grid grid-cols-3 gap-2"><div><span class="label-gold">RATIO</span><p class="text-white text-sm">1:${i.origRatio}</p></div><div><span class="label-gold">PÓ</span><p class="text-white text-sm">${i.origPo}g</p></div><div><span class="label-gold">TOTAL</span><p class="text-amber-500 text-sm">${i.origTotal}ml</p></div></div><div class="grid grid-cols-2 gap-2"><div><span class="label-gold">CLICKS</span><p class="text-white text-sm">${i.origClicks||'--'}</p></div><div><span class="label-gold">TEMP</span><p class="text-white text-sm">${i.origTemp||'--'}°</p></div></div>${atkH ? `<div><span class="label-gold">ATAQUES</span>${atkH}</div>` : ''}`;
-            document.getElementById('modal-detalhes').classList.remove('hidden');
-        }
-
+        function fecharDetalhes() { document.getElementById('modal-detalhes').classList.add('hidden'); }
         function toggleTimer() { if(timer) { clearInterval(timer); timer = null; document.getElementById('btn-timer-main').innerText="CONTINUAR"; } else { timer = setInterval(() => { seg++; document.getElementById('timer').innerText = `${Math.floor(seg/60).toString().padStart(2,'0')}:${(seg%60).toString().padStart(2,'0')}`; }, 1000); document.getElementById('btn-timer-main').innerText="PAUSAR"; } }
         function abrirFeedback() { if(timer){ clearInterval(timer); timer = null; } document.getElementById('modal-feedback').classList.remove('hidden'); }
-        function fecharFeedback() { document.getElementById('modal-feedback').classList.add('hidden'); seg=0; document.getElementById('timer').innerText="00:00"; setRating(0); document.getElementById('f-obs').value=""; }
-        function setRating(n) { notaSelecionada = n; const stars = document.querySelectorAll('.star'); stars.forEach((s, i) => s.classList.toggle('active', i < n)); }
-        async function salvarFeedback() { const g = document.getElementById('p-g'), r = document.getElementById('p-r'); await db.collection('logs').add({ grao: g.options[g.selectedIndex].text, receita: r.options[r.selectedIndex].text, tempoTotal: document.getElementById('timer').innerText, nota: notaSelecionada, observacoes: (document.getElementById('f-obs').value||"").toUpperCase(), data: new Date().toLocaleString(), ts: firebase.firestore.FieldValue.serverTimestamp(), owner_uid: currentUser.uid }); fecharFeedback(); showTab('diario'); }
+        function fecharFeedback() { document.getElementById('modal-feedback').classList.add('hidden'); seg=0; document.getElementById('timer').innerText="00:00"; setRating(0); }
+        function setRating(n) { notaSelecionada = n; document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('active', i < n)); }
+        async function salvarFeedback() { const g = document.getElementById('p-g'), r = document.getElementById('p-r'); await db.collection('logs').add({ grao: g.options[g.selectedIndex].text, receita: r.options[r.selectedIndex].text, tempoTotal: document.getElementById('timer').innerText, nota: notaSelecionada, docura: document.getElementById('f-doce').value, acidez: document.getElementById('f-acidez').value, amargor: document.getElementById('f-amargor').value, corpo: document.getElementById('f-corpo').value, observacoes: (document.getElementById('f-obs').value||"").toUpperCase(), data: new Date().toLocaleString(), ts: firebase.firestore.FieldValue.serverTimestamp(), owner_uid: currentUser.uid }); fecharFeedback(); showTab('diario'); }
+        function abrirDetalhesG(id) { const i = localData.g.find(x => x.id === id); if(!i) return; const img = (i.photo && i.photo.length > 100) ? i.photo : DEFAULT_IMG; document.getElementById('detalhes-content').innerHTML = `<div class="flex justify-center mb-4"><img src="${img}" class="w-44 h-44 rounded-2xl object-cover border-2 border-zinc-800 shadow-2xl cursor-zoom-in" onclick="ampliarImagem('${img}')"></div><div><span class="label-gold">PRODUTOR</span><p class="text-white font-bold italic text-sm">${i.prod||'--'}</p></div><div><span class="label-gold">IDENTIFICAÇÃO</span><p class="text-white font-bold italic text-sm">${i.nome||'--'}</p></div><div><span class="label-gold">TORREFAÇÃO</span><p class="text-amber-500 font-bold italic text-sm">${i.torrefacao||'--'}</p></div><div class="grid grid-cols-2 gap-2"><div><span class="label-gold">VARIEDADE</span><p class="text-white font-bold italic text-sm">${i.variedade||'--'}</p></div><div><span class="label-gold">PROCESSO</span><p class="text-white font-bold italic text-sm">${i.processo||'--'}</p></div></div><div><span class="label-gold">ALTITUDE | TORRA</span><p class="text-white font-bold italic text-sm"><span class="text-white">${i.altitude||'--'}</span> | <span class="text-white">${i.torra||'--'}</span></p></div><div><span class="label-gold">NOTAS</span><p class="text-zinc-400 italic text-sm">"${i.notas||'--'}"</p></div>`; document.getElementById('modal-detalhes').classList.remove('hidden'); }
+        function abrirDetalhesR(id) { const i = localData.r.find(x => x.id === id); if(!i) return; let atkH = (i.ataques || []).map((a, idx) => `<p class="text-zinc-500 text-[10px]">Atk ${idx+1}: ${a.ml}ml em ${a.sec}s</p>`).join(''); document.getElementById('detalhes-content').innerHTML = `<div><span class="label-gold">RECEITA</span><p class="text-white font-bold italic text-sm">${i.nome}</p></div><div class="grid grid-cols-3 gap-2"><div><span class="label-gold">RATIO</span><p class="text-white text-sm">1:${i.origRatio}</p></div><div><span class="label-gold">PÓ</span><p class="text-white text-sm">${i.origPo}g</p></div><div><span class="label-gold">TOTAL</span><p class="text-amber-500 text-sm">${i.origTotal}ml</p></div></div><div class="grid grid-cols-2 gap-2"><div><span class="label-gold">CLICKS</span><p class="text-white text-sm">${i.origClicks||'--'}</p></div><div><span class="label-gold">TEMP</span><p class="text-white text-sm">${i.origTemp||'--'}°</p></div></div>${atkH ? `<div><span class="label-gold">ATAQUES</span>${atkH}</div>` : ''}`; document.getElementById('modal-detalhes').classList.remove('hidden'); }
         function ampliarImagem(src) { document.getElementById('img-ampliada').src = src; document.getElementById('modal-zoom').classList.remove('hidden'); }
-        function fecharDetalhes() { document.getElementById('modal-detalhes').classList.add('hidden'); }
-        function openPix(){ document.getElementById('pix-modal').classList.remove('hidden'); const qr = document.getElementById("pix-qrcode"); qr.innerHTML = ""; new QRCode(qr, {text: "00020101021126480014br.gov.bcb.pix0119alanpocos@gmail.com5204000053039865802BR5930ALAN DOUGLAS PEREIRA RODRIGUES6005POCOS6304", width: 180, height: 180}); }
-        function closePix(){ document.getElementById('pix-modal').classList.add('hidden'); }
-        function copyPix(){ navigator.clipboard.writeText("alanpocos@gmail.com"); alert('Pix copiado!'); }
         function toggleAuth(l) { document.getElementById('login-form').classList.toggle('hidden', !l); document.getElementById('signup-form').classList.toggle('hidden', l); }
         async function handleLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-pass').value); } catch(e) { alert(e.message); } }
         async function handleSignup() { try { const res = await auth.createUserWithEmailAndPassword(document.getElementById('sign-email').value, document.getElementById('sign-pass').value); await db.collection('users').doc(res.user.uid).set({ nick: document.getElementById('sign-nick').value, type: document.getElementById('sign-type').value, email: document.getElementById('sign-email').value, uid: res.user.uid }); } catch(e) { alert(e.message); } }
