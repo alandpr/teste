@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v10.25</title>
+    <title>Coffee Master v10.26</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,9 @@
         body { background: #0a0a0a; color: #fff; font-family: sans-serif; padding-bottom: 120px; zoom: 1.15; overflow-x: hidden; }
         .card { background: #161616; border-radius: 18px; padding: 14px; margin-bottom: 12px; border: 1px solid #262626; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         .label-gold { color: #f59e0b; font-size: 9px; font-weight: 900; text-transform: uppercase; margin-top: 20px; margin-bottom: 4px; margin-left: 6px; letter-spacing: 1px; display: block; }
+        .label-gold:first-child { margin-top: 0; }
         input, select, textarea { background: #222; border: 2px solid #333; color: #fff; padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 4px; font-size: 16px; font-weight: 900; font-style: italic; -webkit-appearance: none; }
+        input:focus { border-color: #f59e0b; outline: none; }
         .btn-gold { background: #f59e0b; color: #000; font-weight: 900; padding: 18px; border-radius: 18px; width: 100%; text-transform: uppercase; font-size: 14px; margin-top: 15px; cursor: pointer; }
         .tab-btn { background: #111; color: #444; flex: 1; padding: 14px 5px; border-radius: 14px; font-size: 10px; font-weight: 900; margin: 3px; border: 1px solid #222; }
         .active-tab { background: #f59e0b; color: #000; border-color: #fbbf24; }
@@ -56,13 +58,14 @@
         <button class="text-zinc-500 text-[10px] mt-4 font-bold uppercase" onclick="fecharFeedback()">Pular</button>
     </div></div>
 
-    <!-- MAIN UI -->
+    <div id="pix-modal" class="hidden" onclick="closePix()"><div class="card w-full max-w-sm mx-auto text-center" onclick="event.stopPropagation()"><h2 class="text-amber-500 font-black italic uppercase mb-4">Apoie o Coffee Master</h2><div id="pix-qrcode" class="flex justify-center mb-4 bg-white p-2 rounded-lg"></div><button class="btn-gold w-full" onclick="copyPix()">Copiar Chave Pix</button><button class="text-zinc-500 text-[10px] mt-4 uppercase font-bold" onclick="closePix()">Fechar</button></div></div>
+
+    <!-- MAIN APP -->
     <div id="auth-screen">
         <div class="card w-full max-w-sm mx-auto text-center">
             <h1 class="text-3xl font-black text-amber-500 italic uppercase mb-8">COFFEE MASTER</h1>
             <div id="login-form">
-                <input type="email" id="login-email" placeholder="E-MAIL">
-                <input type="password" id="login-pass" placeholder="SENHA">
+                <input type="email" id="login-email" placeholder="E-MAIL"><input type="password" id="login-pass" placeholder="SENHA">
                 <button class="btn-gold w-full mt-6" onclick="handleLogin()">Entrar</button>
                 <p class="text-[10px] mt-6 uppercase text-zinc-500 underline" onclick="toggleAuth(false)">Criar agora</p>
             </div>
@@ -79,8 +82,11 @@
 
     <div id="main-app" class="hidden">
         <div class="flex justify-between items-center mb-5 sticky top-0 bg-black z-50 py-2">
-            <div><h1 class="text-2xl font-black text-amber-500 italic uppercase">COFFEE MASTER</h1><span id="user-display" class="text-[8px] font-black text-zinc-600 uppercase"></span></div>
-            <button onclick="auth.signOut()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-zinc-700 text-zinc-500">Sair</button>
+            <div><h1 class="text-2xl font-black text-amber-500 italic uppercase leading-none">COFFEE MASTER</h1><span id="user-display" class="text-[8px] font-black text-zinc-600 uppercase"></span></div>
+            <div class="flex gap-2">
+                <button onclick="openPix()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-amber-600 text-amber-500 italic uppercase">Pagar um café ☕</button>
+                <button onclick="auth.signOut()" class="bg-zinc-900 text-[9px] font-black p-2 rounded-lg border border-zinc-700 text-zinc-500">Sair</button>
+            </div>
         </div>
         
         <div id="tabs-container" class="flex mb-6 bg-black p-1 rounded-2xl sticky top-[55px] z-50 border border-zinc-800 shadow-2xl overflow-x-auto no-scrollbar">
@@ -91,14 +97,15 @@
             <button id="btn-admin" class="tab-btn hidden" onclick="showTab('admin')">ADMIN</button>
         </div>
 
+        <!-- ABA GRÃOS -->
         <div id="tab-cafes">
             <div class="card p-4">
                 <span class="label-gold mt-0">Produtor</span><input type="text" id="g-prod">
                 <span class="label-gold">Grão</span><input type="text" id="g-nome">
                 <div class="flex gap-2"><div class="flex-1"><span class="label-gold">Variedade</span><input type="text" id="g-variedade"></div><div class="flex-1"><span class="label-gold">Processo</span><input type="text" id="g-processo"></div></div>
                 <div class="flex gap-2"><div class="flex-1"><span class="label-gold">Torrefação</span><input type="text" id="g-torrefacao"></div><div class="flex-1"><span class="label-gold">Altitude</span><input type="text" id="g-altitude"></div></div>
-                <div class="flex gap-2"><div class="flex-1"><span class="label-gold">Torra</span><select id="g-torra"><option value="" disabled selected>SELECIONAR</option><option>CLARA</option><option>MÉDIA</option><option>ESCURA</option></select></div><div class="flex-1"><span class="label-gold">DATA TORRA</span><input type="date" id="g-data"></div></div>
-                <textarea id="g-notas" rows="2" class="mt-4" placeholder="NOTAS SENSORIAIS..."></textarea>
+                <div class="flex gap-2"><div class="flex-1"><span class="label-gold">Torra</span><select id="g-torra"><option value=""></option><option>CLARA</option><option>MÉDIA</option><option>ESCURA</option></select></div><div class="flex-1"><span class="label-gold">DATA TORRA</span><input type="date" id="g-data"></div></div>
+                <span class="label-gold">Notas Sensoriais</span><textarea id="g-notas" rows="2"></textarea>
                 <span class="label-gold">Foto</span><input type="file" id="g-photo-input" accept="image/*" class="text-[10px] bg-transparent border-dashed border-zinc-700 p-2">
                 <div id="g-edit-actions" class="hidden flex gap-2 mt-4"><button class="btn-gold flex-1 mt-0" onclick="saveG()">Atualizar</button><button class="bg-zinc-800 text-zinc-400 font-black py-4 px-4 rounded-xl flex-[0.3]" onclick="cancelEdit('g')">X</button></div>
                 <button class="btn-gold w-full mt-4" onclick="saveG()" id="g-btn-main">Salvar Grão</button>
@@ -107,10 +114,11 @@
             <div id="list-g" class="space-y-3"></div>
         </div>
 
+        <!-- ABA RECEITAS -->
         <div id="tab-receitas" class="hidden">
             <div class="card p-4">
                 <span class="label-gold mt-0">Nome</span><input type="text" id="r-nome">
-                <span class="label-gold">Método</span><select id="r-metodo"><option value="" disabled selected>SELECIONAR</option><option>V60</option><option>AEROPRESS</option><option>KOAR</option><option>OUTROS</option></select>
+                <span class="label-gold">Método</span><select id="r-metodo"><option value=""></option><option>V60</option><option>AEROPRESS</option><option>KOAR</option><option>OUTROS</option></select>
                 <div class="grid grid-cols-3 gap-2 mt-2"><div><span class="label-gold mt-0">Ratio</span><input type="number" id="r-ratio" step="0.1" oninput="calcTotalR()"></div><div><span class="label-gold mt-0">Pó(g)</span><input type="number" id="r-po" oninput="calcTotalR()"></div><div><span class="label-gold mt-0">Total</span><input type="number" id="r-total" readonly class="text-amber-500 font-bold bg-transparent border-none"></div></div>
                 <div class="grid grid-cols-2 gap-2"><div><span class="label-gold mt-0">Clicks</span><input type="number" id="r-clicks"></div><div><span class="label-gold mt-0">Temp</span><input type="number" id="r-temp"></div></div>
                 <div class="grid grid-cols-2 gap-2 mt-2 border-t border-zinc-800 pt-2"><div><span class="label-gold mt-0">Bloom(ml)</span><input type="number" id="r-bloom-ml"></div><div><span class="label-gold mt-0">Tempo(s)</span><input type="number" id="r-bloom-sec"></div></div>
@@ -130,15 +138,16 @@
                     <div><span class="label-gold mt-0 text-[8px]">Clicks</span><input type="text" id="p-clicks-val" value="--" onfocus="handleFocus(this)" class="text-center text-sm text-zinc-500 font-black bg-transparent border-none"></div>
                     <div><span class="label-gold mt-0 text-[8px]">Temp</span><input type="text" id="p-temp-val" value="--" onfocus="handleFocus(this)" class="text-center text-sm text-zinc-500 font-black bg-transparent border-none"></div>
                 </div>
-                <div class="bg-zinc-900 rounded-2xl py-4 px-5 mt-6 border border-zinc-800 flex justify-between items-center"><span class="text-[10px] font-black text-zinc-500 uppercase italic">Água</span><div class="text-4xl font-black text-white italic"><span id="p-total-display">0</span>ml</div></div>
-                <div id="p-steps" class="flex gap-3 mt-6 overflow-x-auto pb-4 scroll-smooth no-scrollbar"></div>
+                <div class="bg-zinc-900 rounded-2xl py-4 px-5 mt-6 border border-zinc-800 flex justify-between items-center shadow-inner"><span class="text-[10px] font-black text-zinc-500 uppercase italic">Água</span><div class="text-4xl font-black text-white italic"><span id="p-total-display">0</span>ml</div></div>
+                <div id="p-steps" class="flex gap-3 mt-6 overflow-x-auto pb-4 scroll-smooth no-scrollbar flex-nowrap"></div>
                 <div id="timer" class="text-6xl font-black my-6 text-center italic">00:00</div>
-                <button id="btn-timer-main" onclick="toggleTimer()" class="bg-green-700 text-white font-black py-4 rounded-xl w-full uppercase shadow-lg shadow-green-900/20">Iniciar</button>
+                <button id="btn-timer-main" onclick="toggleTimer()" class="bg-green-700 text-white font-black py-4 rounded-xl w-full uppercase">Iniciar</button>
                 <button onclick="abrirFeedback()" class="bg-amber-600 text-black font-black py-4 rounded-xl w-full mt-3 text-sm uppercase italic">Finalizar</button>
             </div>
         </div>
 
         <div id="tab-diario" class="hidden"><div id="list-logs" class="space-y-3"></div></div>
+        
         <div id="tab-admin" class="hidden text-center"><h2 class="text-amber-500 font-black italic uppercase text-lg mb-4">Painel Admin</h2><div class="grid grid-cols-2 gap-2 mb-6"><div class="card p-4"><span class="label-gold mt-0">Usuários</span><div id="admin-user-count" class="text-3xl font-black italic">0</div></div><div class="card p-4"><span class="label-gold mt-0">Receitas</span><div id="admin-total-receitas" class="text-3xl font-black italic">0</div></div></div><div id="admin-user-list" class="space-y-2"></div></div>
     </div>
 
@@ -185,7 +194,7 @@
                 const map = new Map(); snapPub.forEach(d => map.set(d.id, {id: d.id, ...d.data()})); snapOwn.forEach(d => map.set(d.id, {id: d.id, ...d.data()}));
                 results = Array.from(map.values());
             }
-            if(search) results = results.filter(i => i.nome.includes(search) || i.prod.includes(search));
+            if(search) results = results.filter(i => i.nome.includes(search) || (i.prod && i.prod.includes(search)));
             localData.g = results; renderG(results);
         }
 
@@ -274,7 +283,19 @@
             if(currentUser.email !== ADMIN_EMAIL) return;
             const uSnap = await db.collection('users').get(), rSnap = await db.collection('receitas').get();
             document.getElementById('admin-user-count').innerText = uSnap.size; document.getElementById('admin-total-receitas').innerText = rSnap.size;
-            let h = ''; uSnap.forEach(d => { const u = d.data(); h += `<div class="card p-3 flex justify-between items-center cursor-pointer active:bg-zinc-900" onclick="verUsuarioAdmin('${u.uid}')"><div><span class="text-white font-bold italic">@${u.nick}</span><br><span class="text-[8px] text-zinc-500 font-black uppercase">${u.type === 'pessoal' ? '🔒 PRIVADO' : '🌎 COMUNIDADE'}</span></div><button onclick="event.stopPropagation(); auth.sendPasswordResetEmail('${u.email}'); alert('Reset enviado!')" class="text-[8px] font-black border border-amber-600 p-2 rounded text-amber-600 uppercase">Reset</button></div>`; });
+            let h = ''; uSnap.forEach(d => { 
+                const u = d.data(); 
+                h += `<div class="card p-3 flex justify-between items-center cursor-pointer active:bg-zinc-900" onclick="verUsuarioAdmin('${u.uid}')">
+                        <div class="flex items-center gap-3">
+                            <span class="text-white font-bold italic">@${u.nick}</span>
+                            <span class="text-[8px] text-zinc-500 font-black uppercase flex items-center gap-1">${u.type === 'pessoal' ? '🔒 PRIVADO' : '🌎 COMUNIDADE'}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="event.stopPropagation(); auth.sendPasswordResetEmail('${u.email}'); alert('Reset enviado!')" class="text-[8px] font-black border border-amber-600 p-2 rounded text-amber-600 uppercase">Reset</button>
+                            <button onclick="event.stopPropagation(); delUser('${u.uid}', '${u.nick}')" class="text-[8px] font-black border border-red-800 p-2 rounded text-red-600 uppercase">Delete</button>
+                        </div>
+                      </div>`; 
+            });
             document.getElementById('admin-user-list').innerHTML = h;
         }
 
@@ -283,21 +304,20 @@
             document.getElementById('adm-u-nick').innerText = `@${user.nick.toUpperCase()}`;
             const gs = await db.collection('cafes').where('owner_uid', '==', uid).get();
             const rs = await db.collection('receitas').where('owner_uid', '==', uid).get();
+            const logs = await db.collection('logs').where('owner_uid', '==', uid).get();
             let content = `<div class="mb-4"><span class="label-gold">GRÃOS (${gs.size})</span>`;
             gs.forEach(d => { const g = d.data(); content += `<div onclick="goEdit('g','${d.id}')" class="bg-zinc-900 p-3 rounded-xl mb-2 flex justify-between items-center active:bg-zinc-800"><span class="text-white font-bold text-xs truncate">${g.nome}</span><div class="flex gap-2"><button class="p-2 bg-black rounded text-xs">✏️</button><button onclick="event.stopPropagation(); del('cafes','${d.id}','${g.nome}')" class="p-2 bg-black rounded text-xs">🗑️</button></div></div>`; });
             content += `</div><div><span class="label-gold">RECEITAS (${rs.size})</span>`;
             rs.forEach(d => { const r = d.data(); content += `<div onclick="goEdit('r','${d.id}')" class="bg-zinc-900 p-3 rounded-xl mb-2 flex justify-between items-center active:bg-zinc-800"><span class="text-white font-bold text-xs truncate">${r.nome}</span><div class="flex gap-2"><button class="p-2 bg-black rounded text-xs">✏️</button><button onclick="event.stopPropagation(); del('receitas','${d.id}','${r.nome}')" class="p-2 bg-black rounded text-xs">🗑️</button></div></div>`; });
+            content += `</div><div class="mt-4"><span class="label-gold">DIÁRIO (${logs.size})</span>`;
+            logs.forEach(d => { const l = d.data(); content += `<div onclick="showTab('diario'); document.getElementById('admin-user-details').classList.add('hidden')" class="bg-zinc-900 p-3 rounded-xl mb-2 flex justify-between items-center active:bg-zinc-800"><span class="text-white font-bold text-[10px] truncate">${l.grao} (${l.tempoTotal})</span><button onclick="event.stopPropagation(); del('logs','${d.id}','Log')" class="p-2 bg-black rounded text-xs">🗑️</button></div>`; });
             content += `</div>`;
             document.getElementById('adm-u-content').innerHTML = content;
             document.getElementById('admin-user-details').classList.remove('hidden');
         }
 
-        function goEdit(t, id) { 
-            document.getElementById('admin-user-details').classList.add('hidden');
-            if(t === 'g') { showTab('cafes'); setTimeout(() => editG(id), 300); }
-            else { showTab('receitas'); setTimeout(() => editR(id), 300); }
-        }
-
+        async function delUser(uid, nick) { if(confirm(`DELETAR USUÁRIO @${nick}? TODOS OS DADOS SERÃO PERDIDOS.`)) { await db.collection('users').doc(uid).delete(); loadAdmin(); } }
+        function goEdit(t, id) { document.getElementById('admin-user-details').classList.add('hidden'); if(t === 'g') { showTab('cafes'); setTimeout(() => editG(id), 300); } else { showTab('receitas'); setTimeout(() => editR(id), 300); } }
         function resetPreparo() { document.getElementById('p-g').value="0"; document.getElementById('p-r').value="0"; document.getElementById('p-po-val').value="--"; document.getElementById('p-ratio-val').value="--"; document.getElementById('p-clicks-val').value="--"; document.getElementById('p-temp-val').value="--"; document.getElementById('p-total-display').innerText="0"; document.getElementById('p-steps').innerHTML=""; activeStepsData = {steps:[], times:[]}; }
         async function loadDiario() { const snap = await db.collection('logs').where('owner_uid', '==', currentUser.uid).get(); let logs = snap.docs.map(d => ({id: d.id, ...d.data()})); logs.sort((a,b) => (b.ts?b.ts.seconds:0) - (a.ts?a.ts.seconds:0)); let h = ''; logs.forEach(i => { h += `<div class="card p-4 border-l-4 border-l-amber-600 shadow-none"><div class="text-[10px] text-zinc-500 font-bold">${i.data}</div><div class="text-lg font-black italic text-white leading-tight mt-1">${i.grao}</div><div class="text-xs font-bold text-amber-500 uppercase mt-1">${i.receita} | ${i.tempoTotal}</div><div class="grid grid-cols-4 gap-1 mt-2 text-[8px] font-black text-zinc-600"><div>DOC:${i.docura||0}</div><div>ACI:${i.acidez||0}</div><div>AMA:${i.amargor||0}</div><div>COR:${i.corpo||0}</div></div><p class="mt-2 text-xs italic text-zinc-400">"${i.observacoes || '--'}"</p><div class="mt-3 flex justify-between items-center"><div class="text-xl text-amber-500">${'★'.repeat(i.nota)}</div><button onclick="del('logs','${i.id}','Log')" class="text-xs p-2 bg-zinc-900 rounded-lg text-red-800 font-black">🗑️</button></div></div>`; }); document.getElementById('list-logs').innerHTML = h || '<div class="text-center p-10 text-zinc-600 font-black uppercase italic">Vazio</div>'; }
         async function processImage(file) { return new Promise((resolve) => { const reader = new FileReader(); reader.onload = (e) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = 600; canvas.height = 600; canvas.getContext('2d').drawImage(img, (img.width-Math.min(img.width,img.height))/2, (img.height-Math.min(img.width,img.height))/2, Math.min(img.width,img.height), Math.min(img.width,img.height), 0, 0, 600, 600); resolve(canvas.toDataURL('image/jpeg', 0.8)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }); }
