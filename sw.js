@@ -1,20 +1,16 @@
-const CACHE_NAME = 'cm-v10-8';
-const assets = [
-  './',
-  'index.html',
-  'manifest.json'
-];
+const CACHE_NAME = 'cm-v25-final-manual';
+const assets = ['./', 'index.html', 'manifest.json'];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(assets))
-  );
+  self.skipWaiting();
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(assets)));
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(clients.claim());
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))));
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      return cachedResponse || fetch(event.request);
-    })
-  );
+  event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));
 });
