@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coffee Master v13.7</title>
+    <title>Coffee Master v13.9</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -30,7 +30,6 @@
         .star.active { color: #f59e0b; }
         .grain-thumb { width: 75px; height: 75px; border-radius: 16px; object-fit: cover; background: #222; border: 1px solid #333; flex-shrink: 0; }
         .atk-row { background: #111; padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #222; }
-        /* Novos estilos v13.7 */
         .bar-bg { background: #222; height: 4px; border-radius: 2px; width: 100%; overflow: hidden; margin-top: 2px; }
         .bar-fill { background: #f59e0b; height: 100%; transition: width 0.3s; }
         .log-card { min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; }
@@ -66,7 +65,8 @@
 
         <div id="tab-cafes">
             <div class="card p-4"><span class="label-gold mt-0">Produtor</span><input type="text" id="g-prod"><span class="label-gold">Grão</span><input type="text" id="g-nome"><div class="flex gap-2"><div class="flex-1"><span class="label-gold">Variedade</span><input type="text" id="g-variedade"></div><div class="flex-1"><span class="label-gold">Processo</span><input type="text" id="g-processo"></div></div><div class="flex gap-2"><div class="flex-1"><span class="label-gold">Torrefação</span><input type="text" id="g-torrefacao"></div><div class="flex-1"><span class="label-gold">Altitude</span><input type="text" id="g-altitude"></div></div><div class="flex gap-2"><div class="flex-1"><span class="label-gold">Torra</span><select id="g-torra"><option value=""></option><option>CLARA</option><option>MÉDIA</option><option>ESCURA</option></select></div><div class="flex-1"><span class="label-gold">DATA TORRA</span><input type="date" id="g-data"></div></div><span class="label-gold">Notas Sensoriais</span><textarea id="g-notas" rows="2"></textarea><span class="label-gold">Foto</span><input type="file" id="g-photo-input" accept="image/*" class="text-[10px] bg-transparent border-dashed border-zinc-700 p-2"><div id="g-edit-actions" class="hidden flex gap-2 mt-4"><button class="btn-gold flex-1 mt-0" onclick="saveG()">Atualizar</button><button class="bg-zinc-800 text-zinc-400 font-black py-4 px-4 rounded-xl flex-[0.3]" onclick="cancelEdit('g')">X</button></div><button class="btn-gold w-full mt-4" onclick="saveG()" id="g-btn-main">Salvar Grão</button></div>
-            <input type="text" id="search-g" oninput="loadG()" class="bg-black border border-zinc-800 p-3 rounded-xl w-full mb-4 text-xs uppercase" placeholder="FILTRAR GRÃOS..."><div id="list-g" class="space-y-3"></div>
+            <input type="text" id="search-g" oninput="loadG()" class="bg-black border border-zinc-800 p-3 rounded-xl w-full mb-4 text-xs uppercase" placeholder="FILTRAR POR NOME, PRODUTOR, TORREFAÇÃO, VARIETADE, ALTITUDE...">
+            <div id="list-g" class="space-y-3"></div>
         </div>
 
         <div id="tab-receitas" class="hidden"><div class="card p-4"><span class="label-gold mt-0">Nome</span><input type="text" id="r-nome"><span class="label-gold">Método</span><select id="r-metodo"><option value=""></option><option>V60</option><option>AEROPRESS</option><option>KOAR</option><option>OUTROS</option></select><div class="grid grid-cols-3 gap-2 mt-2"><div><span class="label-gold mt-0">Ratio</span><input type="number" id="r-ratio" step="0.1" oninput="calcTotalR()"></div><div><span class="label-gold mt-0">Pó(g)</span><input type="number" id="r-po" oninput="calcTotalR()"></div><div><span class="label-gold mt-0">Total</span><input type="number" id="r-total" readonly class="text-amber-500 font-bold bg-transparent border-none"></div></div><div class="grid grid-cols-2 gap-2"><div><span class="label-gold mt-0">Clicks</span><input type="number" id="r-clicks"></div><div><span class="label-gold mt-0">Temp</span><input type="number" id="r-temp"></div></div><div class="grid grid-cols-2 gap-2 mt-2 border-t border-zinc-800 pt-2"><div><span class="label-gold mt-0">Bloom(ml)</span><input type="number" id="r-bloom-ml"></div><div><span class="label-gold mt-0">Tempo(s)</span><input type="number" id="r-bloom-sec"></div></div><div id="ataques-container" class="mt-2"></div><button onclick="addAtackField()" class="text-[9px] font-black text-amber-500 mt-2 p-3 border border-dashed border-amber-900 w-full rounded-lg uppercase">+ ADD ATAQUE</button><div id="r-edit-actions" class="hidden flex gap-2 mt-4"><button class="btn-gold flex-1 mt-0" onclick="saveR()">Atualizar</button><button class="bg-zinc-800 text-zinc-400 font-black py-4 px-4 rounded-xl flex-[0.3]" onclick="cancelEdit('r')">X</button></div><button class="btn-gold w-full mt-4" onclick="saveR()" id="r-btn-main">Salvar Receita</button></div><div id="list-r" class="space-y-3"></div></div>
@@ -117,7 +117,21 @@
                 sPub.forEach(d => map.set(d.id, {id: d.id, ...d.data()}));
                 sOwn.forEach(d => map.set(d.id, {id: d.id, ...d.data()}));
                 finalRes = Array.from(map.values()).sort((a,b) => (b.ts?b.ts.seconds:0) - (a.ts?a.ts.seconds:0));
-                if(search) finalRes = finalRes.filter(i => i.nome.includes(search) || (i.prod && i.prod.includes(search)));
+                
+                // MUDANÇA CONFORME SOLICITADO: BUSCA GLOBAL POR TODOS OS CAMPOS DO GRÃO
+                if(search) {
+                    finalRes = finalRes.filter(i => 
+                        (i.nome && i.nome.toUpperCase().includes(search)) || 
+                        (i.prod && i.prod.toUpperCase().includes(search)) || 
+                        (i.variedade && i.variedade.toUpperCase().includes(search)) || 
+                        (i.processo && i.processo.toUpperCase().includes(search)) || 
+                        (i.torrefacao && i.torrefacao.toUpperCase().includes(search)) || 
+                        (i.torra && i.torra.toUpperCase().includes(search)) || 
+                        (i.altitude && i.altitude.toString().toUpperCase().includes(search)) || 
+                        (i.notas && i.notas.toUpperCase().includes(search))
+                    );
+                }
+                
                 localData.g = finalRes; renderG(finalRes);
             } catch(e) { console.error(e); }
         }
